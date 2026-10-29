@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -853,8 +854,9 @@ class _Avatar extends StatelessWidget {
 
 /// The folder tree flattened into rows.
 ///
-/// Rows inside collapsed folders stay in the list with [visible] off. Keeping the row order stable
-/// lets each row expand and collapse smoothly (collapsed rows build nothing).
+/// Rows of a collapsed folder are only in the list while they animate closed ([closing]); keeping
+/// thousands of empty rows would make the list guess its length wrong and the scrollbar jump.
+/// Rows of a folder that just opened ([opening]) start hidden for one frame so they animate open.
 sealed class _Row {
   const _Row(this.depth, {required this.visible});
 
@@ -874,12 +876,27 @@ class _LevelRow extends _Row {
   final PackLevelEntry entry;
 }
 
-List<_Row> _flatten(List<PackNode> nodes, Set<int> expanded, {int depth = 0, bool visible = true}) => [
+List<_Row> _flatten(
+  List<PackNode> nodes, {
+  required Set<int> expanded,
+  required Set<int> closing,
+  required Set<int> opening,
+  int depth = 0,
+  bool visible = true,
+}) => [
   for (final node in nodes)
     ...switch (node) {
       PackFolder() => [
         _FolderRow(node, depth, visible: visible),
-        ..._flatten(node.children, expanded, depth: depth + 1, visible: visible && expanded.contains(node.id)),
+        if (expanded.contains(node.id) || closing.contains(node.id))
+          ..._flatten(
+            node.children,
+            expanded: expanded,
+            closing: closing,
+            opening: opening,
+            depth: depth + 1,
+            visible: visible && expanded.contains(node.id) && !opening.contains(node.id),
+          ),
       ],
       PackLevelEntry() => [_LevelRow(node, depth, visible: visible)],
     },
@@ -900,10 +917,55 @@ class _PackDetailViewState extends State<_PackDetailView> {
 
   final _scroll = SmoothScrollController();
 
+  /// Expanded folders as of the last change, to tell which folders just opened or closed.
+  late Set<int> _expanded;
+
+  /// Folders whose rows are still animating closed, and folders whose rows wait one frame before animating open.
+  final _closing = <int>{};
+  final _opening = <int>{};
+
+  @override
+  void initState() {
+    super.initState();
+    // Copied now: a lazy initializer would only run on the first change, after it already happened.
+    _expanded = {...widget.packs.expanded};
+    widget.packs.addListener(_onPacksChanged);
+  }
+
   @override
   void dispose() {
+    widget.packs.removeListener(_onPacksChanged);
     _scroll.dispose();
     super.dispose();
+  }
+
+  void _onPacksChanged() {
+    final now = widget.packs.expanded;
+    final opened = now.difference(_expanded);
+    final closed = _expanded.difference(now);
+    _expanded = {...now};
+    if (opened.isEmpty && closed.isEmpty) return;
+
+    setState(() {
+      _opening
+        ..addAll(opened)
+        ..removeAll(closed);
+      _closing
+        ..addAll(closed)
+        ..removeAll(opened);
+    });
+    if (opened.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() => _opening.removeAll(opened));
+      });
+    }
+    if (closed.isNotEmpty) {
+      // A little longer than the animation, which starts on the next frame.
+      Timer(Motion.medium + const Duration(milliseconds: 50), () {
+        // Only drop the rows if the folder wasn't reopened meanwhile.
+        if (mounted) setState(() => _closing.removeAll(closed.difference(widget.packs.expanded)));
+      });
+    }
   }
 
   @override
@@ -919,7 +981,9 @@ class _PackDetailViewState extends State<_PackDetailView> {
         // The count on the Download button changes when downloaded levels change.
         listenable: app.installs,
         builder: (context, _) {
-          final rows = detail == null ? const <_Row>[] : _flatten(detail.items, packs.expanded);
+          final rows = detail == null
+              ? const <_Row>[]
+              : _flatten(detail.items, expanded: packs.expanded, closing: _closing, opening: _opening);
 
           return ColoredBox(
             color: Theme.of(context).scaffoldBackgroundColor,

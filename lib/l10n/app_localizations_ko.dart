@@ -121,8 +121,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get cantDoThisWhile =>
-      '받는 중인 레벨이 있어서 지금은 할 수 없습니다. 받기가 끝난 뒤 다시 해 주세요.';
+  String get cantDoThisWhile => '받는 중인 레벨이 있어서 지금은 할 수 없습니다. 받기가 끝난 뒤 다시 해 주세요.';
 
   @override
   String skippedStillDownloading(Object skipped) {
@@ -140,12 +139,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String movedButCouldNot(
-    Object count,
-    Object failed,
-    Object error,
-    Object skipped,
-  ) {
+  String movedButCouldNot(Object count, Object failed, Object error, Object skipped) {
     return '$count개를 옮기고 $failed개는 옮기지 못했습니다 ($error)$skipped';
   }
 
@@ -227,12 +221,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String stoppedDownloadingPack(
-    Object name,
-    Object done,
-    Object total,
-    Object failed,
-  ) {
+  String stoppedDownloadingPack(Object name, Object done, Object total, Object failed) {
     return '\'$name\' 받기를 멈췄습니다 ($done/$total개 받음$failed)';
   }
 
@@ -687,8 +676,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String passCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '클리어 $countString개';
@@ -741,8 +729,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String creatorCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '제작자 $countString명';
@@ -786,8 +773,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String playerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '플레이어 $countString명';
@@ -875,8 +861,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String levelCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '레벨 $countString개';
@@ -902,8 +887,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String uniquePlayerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '$countString명';
@@ -911,8 +895,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String totalClearsSuffix(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return ' (총 $countString회)';
@@ -957,8 +940,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String folderCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '폴더 $countString개';
@@ -982,13 +964,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get more => '더 보기';
 
   @override
-  String get organizeYourDownloadedLevels =>
-      '받아 둔 레벨을 폴더로 정리하고 업데이트를 확인할 수 있어요.';
+  String get organizeYourDownloadedLevels => '받아 둔 레벨을 폴더로 정리하고 업데이트를 확인할 수 있어요.';
 
   @override
   String levelCountAndSize(int count, Object size) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '레벨 $countString개  ·  $size';
@@ -1070,8 +1050,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String thisDeletesItFrom(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '폴더 안의 레벨 $countString개를 포함해 디스크에서 지워집니다.';
@@ -1121,16 +1100,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get levelPacks => '레벨 팩';
 
   @override
-  String get browseLevelPacksMade =>
-      '커뮤니티에서 만든 레벨 팩을 둘러보고, 폴더 구조 그대로 한 번에 받아보세요.';
+  String get browseLevelPacksMade => '커뮤니티에서 만든 레벨 팩을 둘러보고, 폴더 구조 그대로 한 번에 받아보세요.';
 
   @override
   String get searchByPackName => '팩 이름으로 검색';
 
   @override
   String packCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '팩 $countString개';
@@ -1158,8 +1135,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String likeCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '좋아요 $countString개';
@@ -1250,8 +1226,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String worldsFirstClearCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '세계 최초 클리어 $countString개';
@@ -1362,8 +1337,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String clearCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '$countString회 클리어';
@@ -1385,8 +1359,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String followerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '팔로워 $countString명';
@@ -1443,8 +1416,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String playerPassCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '$countString개 클리어';
@@ -1461,8 +1433,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String creatorLevelCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return '$countString개';
@@ -1572,8 +1543,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String baseScoreOverridePP(int score) {
-    final intl.NumberFormat scoreNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat scoreNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String scoreString = scoreNumberFormat.format(score);
 
     return '기반 점수 변동: $scoreString PP (난이도 기본 점수 대신 적용됩니다)';
@@ -1590,11 +1560,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String clearedByPlayerTotal(int players, int clears) {
-    final intl.NumberFormat playersNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat playersNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String playersString = playersNumberFormat.format(players);
-    final intl.NumberFormat clearsNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat clearsNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String clearsString = clearsNumberFormat.format(clears);
 
     return '클리어 $playersString명 (총 $clearsString회)';
@@ -1669,8 +1637,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get altHoldOption => '기본 외 홀드 타일 동작';
 
   @override
-  String get beforeTheEngineChange =>
-      '엔진 변경 이전 버전입니다 (v2.9.8까지).\n타이밍 엔진 문제로 안정성과 정밀도가 낮았습니다.';
+  String get beforeTheEngineChange => '엔진 변경 이전 버전입니다 (v2.9.8까지).\n타이밍 엔진 문제로 안정성과 정밀도가 낮았습니다.';
 
   @override
   String get beforeXPerfectUp => 'X-Perfect 이전 버전입니다 (v3.3.1까지).';
@@ -1847,8 +1814,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get playerScoreRankedScore => '랭크 점수';
 
   @override
-  String get playerScoreRankedScoreDescription =>
-      '상위 20개 클리어 점수 합산 (순위 낮을수록 감소, 재클리어 제외)';
+  String get playerScoreRankedScoreDescription => '상위 20개 클리어 점수 합산 (순위 낮을수록 감소, 재클리어 제외)';
 
   @override
   String get playerScoreTotalScoreV2 => '총 점수';
@@ -1878,8 +1844,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get playerScoreWfPPScore => '세계 최초 완플 점수';
 
   @override
-  String get playerScoreWfPPScoreDescription =>
-      '세계 최초 완벽한 플레이 클리어한 레벨 기본 점수 합산';
+  String get playerScoreWfPPScoreDescription => '세계 최초 완벽한 플레이 클리어한 레벨 기본 점수 합산';
 
   @override
   String get playerScoreScore12K => '12키 점수';

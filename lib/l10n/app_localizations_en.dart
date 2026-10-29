@@ -107,12 +107,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String replacedPlusInFolders(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'names',
-      one: 'name',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'names', one: 'name');
     return 'Replaced \'+\' with \'_\' in $count folder $_temp0. The game can\'t load paths that contain \'+\'.';
   }
 
@@ -127,8 +122,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cantDoThisWhile =>
-      'Can\'t do this while a level is downloading. Try again once the download finishes.';
+  String get cantDoThisWhile => 'Can\'t do this while a level is downloading. Try again once the download finishes.';
 
   @override
   String skippedStillDownloading(Object skipped) {
@@ -142,33 +136,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String movedItems(int count, Object where, Object skipped) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'items', one: 'item');
     return 'Moved $count $_temp0 to $where.$skipped';
   }
 
   @override
-  String movedButCouldNot(
-    Object count,
-    Object failed,
-    Object error,
-    Object skipped,
-  ) {
+  String movedButCouldNot(Object count, Object failed, Object error, Object skipped) {
     return 'Moved $count, but $failed could not be moved ($error)$skipped';
   }
 
   @override
   String deletedItems(int count, Object skipped) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'items', one: 'item');
     return 'Deleted $count $_temp0.$skipped';
   }
 
@@ -184,12 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deletedWithLevels(int count, Object name) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return 'Deleted with $count $_temp0: $name';
   }
 
@@ -203,12 +177,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String removedMissingLevels(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return ' Removed $count $_temp0 whose folder is gone.';
   }
 
@@ -217,12 +186,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String updatesAvailable(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels have',
-      one: 'level has',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels have', one: 'level has');
     return '$count $_temp0 an update.';
   }
 
@@ -242,8 +206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cantChangeTheFolder =>
-      'Can\'t change the folder while a level is downloading.';
+  String get cantChangeTheFolder => 'Can\'t change the folder while a level is downloading.';
 
   @override
   String get useThisFolder => 'Use this folder';
@@ -264,23 +227,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String stoppedDownloadingPack(
-    Object name,
-    Object done,
-    Object total,
-    Object failed,
-  ) {
+  String stoppedDownloadingPack(Object name, Object done, Object total, Object failed) {
     return 'Stopped downloading \'$name\' ($done/$total done$failed)';
   }
 
   @override
   String downloadedPack(Object name, int done, Object failed) {
-    String _temp0 = intl.Intl.pluralLogic(
-      done,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(done, locale: localeName, other: 'levels', one: 'level');
     return 'Downloaded \'$name\': $done $_temp0$failed';
   }
 
@@ -306,12 +259,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String removedUnreadableEntries(int skipped) {
-    String _temp0 = intl.Intl.pluralLogic(
-      skipped,
-      locale: localeName,
-      other: 'entries',
-      one: 'entry',
-    );
+    String _temp0 = intl.Intl.pluralLogic(skipped, locale: localeName, other: 'entries', one: 'entry');
     return 'Removed $skipped unreadable $_temp0 from the downloaded level list.';
   }
 
@@ -570,12 +518,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String typeLevelCount(Object type, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return '$type · $count $_temp0';
   }
 
@@ -588,8 +531,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get unexpectedDifficultyListResponse =>
-      'Unexpected difficulty list response.';
+  String get unexpectedDifficultyListResponse => 'Unexpected difficulty list response.';
 
   @override
   String get listTag => 'tag';
@@ -621,12 +563,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unexpectedPassListResponse => 'Unexpected pass list response.';
 
   @override
-  String get unexpectedLeaderboardResponse =>
-      'Unexpected leaderboard response.';
+  String get unexpectedLeaderboardResponse => 'Unexpected leaderboard response.';
 
   @override
-  String get unexpectedCreatorListResponse =>
-      'Unexpected creator list response.';
+  String get unexpectedCreatorListResponse => 'Unexpected creator list response.';
 
   @override
   String playerNotFound(Object id) {
@@ -691,8 +631,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keys12 => '12K';
 
   @override
-  String get theServersDifficultyList =>
-      'The server\'s difficulty list has no PGU difficulties.';
+  String get theServersDifficultyList => 'The server\'s difficulty list has no PGU difficulties.';
 
   @override
   String get levels => 'Levels';
@@ -746,16 +685,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String passCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'passes',
-      one: 'pass',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'passes', one: 'pass');
     return '$countString $_temp0';
   }
 
@@ -802,21 +735,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewPlayerProfile => 'View player profile';
 
   @override
-  String get findThePeopleWho =>
-      'Find the people who make levels by level count, clears, and curations.';
+  String get findThePeopleWho => 'Find the people who make levels by level count, clears, and curations.';
 
   @override
   String creatorCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'creators',
-      one: 'creator',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'creators', one: 'creator');
     return '$countString $_temp0';
   }
 
@@ -842,8 +768,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get curationTypes => 'Curation types';
 
   @override
-  String get onlyShowsCreatorsWith =>
-      'Only shows creators with levels of the chosen types.';
+  String get onlyShowsCreatorsWith => 'Only shows creators with levels of the chosen types.';
 
   @override
   String get matchAny => 'Any';
@@ -855,21 +780,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noLinkedAccount => 'No linked account';
 
   @override
-  String get seePlayerRankingsBy =>
-      'See player rankings by score, passes, top difficulty, and more.';
+  String get seePlayerRankingsBy => 'See player rankings by score, passes, top difficulty, and more.';
 
   @override
   String playerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'players',
-      one: 'player',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'players', one: 'player');
     return '$countString $_temp0';
   }
 
@@ -897,8 +815,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get couldntConnectToThe => 'Couldn\'t connect to the server';
 
   @override
-  String get findLevelsOnTUF =>
-      'Find levels on TUF and download them right away.';
+  String get findLevelsOnTUF => 'Find levels on TUF and download them right away.';
 
   @override
   String get searchBySongArtist => 'Search by song, artist, or creator';
@@ -946,8 +863,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get specialDifficulties => 'Special difficulties';
 
   @override
-  String get selectedDifficultiesAreShown =>
-      'Selected difficulties are shown in the results too.';
+  String get selectedDifficultiesAreShown => 'Selected difficulties are shown in the results too.';
 
   @override
   String get selectAll => 'Select all';
@@ -957,16 +873,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String levelCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return '$countString $_temp0';
   }
 
@@ -990,23 +900,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String uniquePlayerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'players',
-      one: 'player',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'players', one: 'player');
     return '$countString $_temp0';
   }
 
   @override
   String totalClearsSuffix(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
     return ' ($countString total)';
@@ -1043,12 +946,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String itemCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'items', one: 'item');
     return '$count $_temp0';
   }
 
@@ -1057,16 +955,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String folderCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'folders',
-      one: 'folder',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'folders', one: 'folder');
     return '$countString $_temp0';
   }
 
@@ -1088,21 +980,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get more => 'More';
 
   @override
-  String get organizeYourDownloadedLevels =>
-      'Organize your downloaded levels into folders and check for updates.';
+  String get organizeYourDownloadedLevels => 'Organize your downloaded levels into folders and check for updates.';
 
   @override
   String levelCountAndSize(int count, Object size) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return '$countString $_temp0  ·  $size';
   }
 
@@ -1177,27 +1062,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String deleteItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'items', one: 'item');
     return 'Delete $count $_temp0?';
   }
 
   @override
   String thisDeletesItFrom(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return 'This deletes it from disk, including $countString $_temp0 inside.';
   }
 
@@ -1214,12 +1088,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String moveItems(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'items', one: 'item');
     return 'Move $count $_temp0';
   }
 
@@ -1239,12 +1108,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisFolderIsEmpty => 'This folder is empty';
 
   @override
-  String get findLevelsYouLike =>
-      'Find levels you like in Levels and download them.';
+  String get findLevelsYouLike => 'Find levels you like in Levels and download them.';
 
   @override
-  String get dragLevelsHereOr =>
-      'Drag levels here, or create more folders inside.';
+  String get dragLevelsHereOr => 'Drag levels here, or create more folders inside.';
 
   @override
   String get browseLevels => 'Browse levels';
@@ -1261,16 +1128,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String packCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'packs',
-      one: 'pack',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'packs', one: 'pack');
     return '$countString $_temp0';
   }
 
@@ -1296,16 +1157,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String likeCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'likes',
-      one: 'like',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'likes', one: 'like');
     return '$countString $_temp0';
   }
 
@@ -1331,18 +1186,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String itemAndLevelCount(int items, int levelCount) {
-    String _temp0 = intl.Intl.pluralLogic(
-      items,
-      locale: localeName,
-      other: 'items',
-      one: 'item',
-    );
-    String _temp1 = intl.Intl.pluralLogic(
-      levelCount,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(items, locale: localeName, other: 'items', one: 'item');
+    String _temp1 = intl.Intl.pluralLogic(levelCount, locale: localeName, other: 'levels', one: 'level');
     return '$items $_temp0 · $levelCount $_temp1';
   }
 
@@ -1364,12 +1209,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String downloadPackExplanation(int count, Object folder) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return 'Downloads the $count $_temp0 you don\'t have yet, one by one.\nThey\'re saved in the \'$folder\' folder of the library, in the same folder layout as the pack.\nLevels you already have are skipped and stay where they are.';
   }
 
@@ -1412,16 +1252,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String worldsFirstClearCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'clears',
-      one: 'clear',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'clears', one: 'clear');
     return '$countString world\'s first $_temp0';
   }
 
@@ -1458,8 +1292,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leavingTUF => 'Leaving TUF?';
 
   @override
-  String get youAreAboutTo =>
-      'You are about to visit an external site. Only continue if you trust this destination.';
+  String get youAreAboutTo => 'You are about to visit an external site. Only continue if you trust this destination.';
 
   @override
   String trustForThisSession(Object host) {
@@ -1531,16 +1364,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String clearCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'clears',
-      one: 'clear',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'clears', one: 'clear');
     return '$countString $_temp0';
   }
 
@@ -1560,16 +1387,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String followerCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'followers',
-      one: 'follower',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'followers', one: 'follower');
     return '$countString $_temp0';
   }
 
@@ -1611,12 +1432,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String difficultyClearCount(Object difficulty, int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'clears',
-      one: 'clear',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'clears', one: 'clear');
     return '$difficulty · $count $_temp0';
   }
 
@@ -1630,16 +1446,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String playerPassCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'passes',
-      one: 'pass',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'passes', one: 'pass');
     return '$countString $_temp0';
   }
 
@@ -1654,16 +1464,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String creatorLevelCount(int count) {
-    final intl.NumberFormat countNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat countNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return '$countString $_temp0';
   }
 
@@ -1678,12 +1482,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String placementCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'placements',
-      one: 'placement',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'placements', one: 'placement');
     return '$count $_temp0';
   }
 
@@ -1732,12 +1531,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String chartLevelCount(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'levels',
-      one: 'level',
-    );
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
     return '$count $_temp0';
   }
 
@@ -1783,8 +1577,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String baseScoreOverridePP(int score) {
-    final intl.NumberFormat scoreNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat scoreNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String scoreString = scoreNumberFormat.format(score);
 
     return 'Base score override: $scoreString PP (used instead of the difficulty\'s base score)';
@@ -1801,19 +1594,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String clearedByPlayerTotal(int players, int clears) {
-    final intl.NumberFormat playersNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat playersNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String playersString = playersNumberFormat.format(players);
-    final intl.NumberFormat clearsNumberFormat =
-        intl.NumberFormat.decimalPattern(localeName);
+    final intl.NumberFormat clearsNumberFormat = intl.NumberFormat.decimalPattern(localeName);
     final String clearsString = clearsNumberFormat.format(clears);
 
-    String _temp0 = intl.Intl.pluralLogic(
-      players,
-      locale: localeName,
-      other: 'players',
-      one: 'player',
-    );
+    String _temp0 = intl.Intl.pluralLogic(players, locale: localeName, other: 'players', one: 'player');
     return 'Cleared by $playersString $_temp0 ($clearsString total)';
   }
 
@@ -1896,8 +1682,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get whatThisPassAdds => 'What this pass adds to the ranked score';
 
   @override
-  String get doesntCountTowardThe =>
-      'Doesn\'t count toward the ranked score (what it could have added)';
+  String get doesntCountTowardThe => 'Doesn\'t count toward the ranked score (what it could have added)';
 
   @override
   String get speedMultiplier => 'Speed';
@@ -2065,57 +1850,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playerScoreRankedScore => 'Ranked Score';
 
   @override
-  String get playerScoreRankedScoreDescription =>
-      'Decaying sum of 20 best clears (excluding reclears)';
+  String get playerScoreRankedScoreDescription => 'Decaying sum of 20 best clears (excluding reclears)';
 
   @override
   String get playerScoreTotalScoreV2 => 'Total Score';
 
   @override
-  String get playerScoreTotalScoreV2Description =>
-      'Sum of all clears without reclears';
+  String get playerScoreTotalScoreV2Description => 'Sum of all clears without reclears';
 
   @override
   String get playerScoreGeneralScore => 'General Score';
 
   @override
-  String get playerScoreGeneralScoreDescription =>
-      'Sum of all clears including reclears';
+  String get playerScoreGeneralScoreDescription => 'Sum of all clears including reclears';
 
   @override
   String get playerScorePpScore => 'PP Score';
 
   @override
-  String get playerScorePpScoreDescription =>
-      'Ranked Score, but all clears must also be pure perfects';
+  String get playerScorePpScoreDescription => 'Ranked Score, but all clears must also be pure perfects';
 
   @override
   String get playerScoreWfScore => 'WF Score';
 
   @override
-  String get playerScoreWfScoreDescription =>
-      'Sum of all level base scores from world\'s first passes';
+  String get playerScoreWfScoreDescription => 'Sum of all level base scores from world\'s first passes';
 
   @override
   String get playerScoreWfPPScore => 'WF PP Score';
 
   @override
-  String get playerScoreWfPPScoreDescription =>
-      'Sum of all level base scores from world\'s first pure perfect passes';
+  String get playerScoreWfPPScoreDescription => 'Sum of all level base scores from world\'s first pure perfect passes';
 
   @override
   String get playerScoreScore12K => '12K Score';
 
   @override
-  String get playerScoreScore12KDescription =>
-      'Ranked Score, but all clears must be 12K';
+  String get playerScoreScore12KDescription => 'Ranked Score, but all clears must be 12K';
 
   @override
   String get playerScoreAverageXacc => 'Average X-acc';
 
   @override
-  String get playerScoreAverageXaccDescription =>
-      'Average accuracy of top 20 passes';
+  String get playerScoreAverageXaccDescription => 'Average accuracy of top 20 passes';
 
   @override
   String get creatorVerificationAllowed => 'Allowed';
