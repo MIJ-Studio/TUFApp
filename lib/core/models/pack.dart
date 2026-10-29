@@ -116,8 +116,7 @@ Iterable<PackLevelEntry> packLevelsIn(List<PackNode> nodes) sync* {
 class LevelPackDetail {
   const LevelPackDetail({required this.pack, required this.items});
 
-  /// [resolveLevel] fills in the pack's bare levels (difficulty and tags as ids only) so cards can show them.
-  factory LevelPackDetail.fromJson(Map<String, dynamic> json, {Level Function(Level level)? resolveLevel}) {
+  factory LevelPackDetail.fromJson(Map<String, dynamic> json) {
     List<PackNode> parse(List<Map<String, dynamic>> items) {
       final sorted = [...items]..sort((a, b) => asInt(a['sortOrder']).compareTo(asInt(b['sortOrder'])));
       return [
@@ -129,7 +128,7 @@ class LevelPackDetail {
               children: parse(asObjectList(item['children'])),
             )
           else if (item['referencedLevel'] case final Map<String, dynamic> level)
-            PackLevelEntry(id: asInt(item['id']), level: (resolveLevel ?? (level) => level)(Level.fromJson(level))),
+            PackLevelEntry(id: asInt(item['id']), level: Level.fromJson(level)),
       ];
     }
 
@@ -140,6 +139,19 @@ class LevelPackDetail {
   final List<PackNode> items;
 
   Iterable<PackLevelEntry> get allLevels => packLevelsIn(items);
+
+  /// The same pack with every level passed through [resolve], which fills in the bare levels
+  /// (difficulty and tags as ids only) so cards can show them.
+  LevelPackDetail mapLevels(Level Function(Level level) resolve) {
+    List<PackNode> map(List<PackNode> nodes) => [
+      for (final node in nodes)
+        switch (node) {
+          PackFolder() => PackFolder(id: node.id, name: node.name, children: map(node.children)),
+          PackLevelEntry() => PackLevelEntry(id: node.id, level: resolve(node.level)),
+        },
+    ];
+    return LevelPackDetail(pack: pack, items: map(items));
+  }
 }
 
 enum PackSort {

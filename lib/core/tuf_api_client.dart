@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import 'frame_log.dart';
 import 'json.dart';
 import 'l10n.dart';
 import 'models/browse.dart';
@@ -34,6 +37,10 @@ class TufApiClient {
 
   /// Requests fail after this long without a response, so a stalled connection never leaves a page waiting forever.
   static const requestTimeout = Duration(seconds: 20);
+
+  /// Responses at least this big are decoded on a background isolate. On the UI thread a 1 MB pack takes
+  /// about 40 ms, long enough to drop frames while scrolling.
+  static const _backgroundDecodeBytes = 64 * 1024;
 
   final http.Client _client;
 
@@ -277,12 +284,14 @@ class TufApiClient {
 
   /// A single pack with its folder structure.
   Future<LevelPackDetail> getPack(String id, {Level Function(Level level)? resolveLevel}) async {
-    final json = await _getJson('v2/database/levels/packs/${Uri.encodeComponent(id)}', {'tree': 'true'});
-    if (json is! Map<String, dynamic>) {
-      throw TufApiException(l10n.unexpectedResponseForPack(id));
-    }
-    return LevelPackDetail.fromJson(json, resolveLevel: resolveLevel);
+    // Big packs have hundreds of levels, so they are parsed along with the decoding, off the UI thread.
+    final detail = await _get('v2/database/levels/packs/${Uri.encodeComponent(id)}', {'tree': 'true'}, _parsePack);
+    if (detail == null) throw TufApiException(l10n.unexpectedResponseForPack(id));
+    return resolveLevel == null ? detail : detail.mapLevels(resolveLevel);
   }
+
+  static LevelPackDetail? _parsePack(Object? json) =>
+      json is Map<String, dynamic> ? LevelPackDetail.fromJson(json) : null;
 
   /// Contents of a level's zip, or null if the level isn't on the CDN.
   Future<CdnLevelMetadata?> getLevelCdnMetadata(int id) async {
@@ -321,7 +330,14 @@ class TufApiClient {
   }
 
   /// [query] values are strings, or lists of strings sent as repeated keys.
-  Future<Object?> _getJson(String path, [Map<String, Object>? query]) async {
+  Future<Object?> _getJson(String path, [Map<String, Object>? query]) => _get(path, query, _identity);
+
+  static Object? _identity(Object? json) => json;
+
+  /// Fetches JSON and turns it into a result with [parse], off the UI thread for big responses.
+  /// [parse] runs on another isolate then, so it must be a static or top-level function that doesn't
+  /// depend on the UI language.
+  Future<T> _get<T>(String path, Map<String, Object>? query, T Function(Object? json) parse) async {
     var uri = baseUri.resolve(path);
     if (query != null) uri = uri.replace(queryParameters: query);
 
@@ -340,12 +356,27 @@ class TufApiClient {
       throw TufApiException('${response.statusCode}: $path ${response.body}'.trim(), response.statusCode);
     }
 
+    final bytes = response.bodyBytes;
     try {
-      return jsonDecode(utf8.decode(response.bodyBytes));
+      final watch = Stopwatch()..start();
+      final background = bytes.length >= _backgroundDecodeBytes;
+      final result = background ? await _decodeInBackground(bytes, parse) : _decode(bytes, parse);
+      FrameLog.note(
+        background ? 'decode (background)' : 'decode',
+        watch.elapsed,
+        detail: '$path, ${bytes.length ~/ 1024} KB',
+      );
+      return result;
     } on FormatException {
       throw TufApiException(l10n.couldNotReadTheResponse(path));
     }
   }
+
+  static T _decode<T>(Uint8List bytes, T Function(Object? json) parse) => parse(jsonDecode(utf8.decode(bytes)));
+
+  // Static, so the closure sent to the isolate can't capture this client.
+  static Future<T> _decodeInBackground<T>(Uint8List bytes, T Function(Object? json) parse) =>
+      Isolate.run(() => _decode(bytes, parse));
 
   void close() => _client.close();
 }

@@ -463,57 +463,48 @@ class _MoreLevels extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle = theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant);
 
-    // Dozens of overlapping icons are expensive to draw, so bake them into one image and draw only that while
-    // scrolling.
     return SizedBox(
       height: 24,
-      child: RasterSnapshot(
-        child: FutureBuilder<LevelPackDetail?>(
-          initialData: packs.cachedDetail(pack.id),
-          future: packs.detailFor(pack.id),
-          builder: (context, snapshot) {
-            final detail = snapshot.data;
-            // Skip levels already in the preview, keeping the pack order.
-            final shownIds = {for (final level in pack.preview.take(previewCount)) level.id};
-            final icons = [
-              if (detail != null)
-                for (final entry in detail.allLevels)
-                  if (!shownIds.contains(entry.level.id)) catalog?.byId(entry.level.diffId)?.icon,
-            ];
+      child: FutureBuilder<LevelPackDetail?>(
+        initialData: packs.cachedDetail(pack.id),
+        future: packs.detailFor(pack.id),
+        builder: (context, snapshot) {
+          final detail = snapshot.data;
+          // Skip levels already in the preview, keeping the pack order.
+          final shownIds = {for (final level in pack.preview.take(previewCount)) level.id};
+          final icons = [
+            if (detail != null)
+              for (final entry in detail.allLevels)
+                if (!shownIds.contains(entry.level.id)) catalog?.byId(entry.level.diffId)?.icon,
+          ];
 
-            final label = l10n.moreCount(more);
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                // Measure the text so the icons end right before it.
-                final painter = TextPainter(
-                  text: TextSpan(text: label, style: textStyle),
-                  textDirection: TextDirection.ltr,
-                  textScaler: MediaQuery.textScalerOf(context),
-                )..layout();
-                final room = constraints.maxWidth - painter.width - _gap;
-                painter.dispose();
-                final fit = room < _iconSize ? 0 : ((room - _iconSize) / _step).floor() + 1;
-                // Draw a little more than fits so the right edge fades out as if continuing.
-                final count = min(icons.length, fit + _overflowIcons);
+          final label = l10n.moreCount(more);
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Measure the text so the icons end right before it.
+              final painter = TextPainter(
+                text: TextSpan(text: label, style: textStyle),
+                textDirection: TextDirection.ltr,
+                textScaler: MediaQuery.textScalerOf(context),
+              )..layout();
+              final room = constraints.maxWidth - painter.width - _gap;
+              painter.dispose();
+              final fit = room < _iconSize ? 0 : ((room - _iconSize) / _step).floor() + 1;
+              // Draw a little more than fits so the right edge fades out as if continuing.
+              final count = min(icons.length, fit + _overflowIcons);
 
-                return Row(
-                  children: [
-                    // Keep the slot even without icons so they can animate in when the contents arrive.
-                    _IconStrip(
-                      icons: icons.take(count).toList(),
-                      size: _iconSize,
-                      step: _step,
-                      maxWidth: max(0.0, room),
-                    ),
-                    // The text always sits at the right edge.
-                    const Spacer(),
-                    Text(label, style: textStyle),
-                  ],
-                );
-              },
-            );
-          },
-        ),
+              return Row(
+                children: [
+                  // Keep the slot even without icons so they can animate in when the contents arrive.
+                  _IconStrip(icons: icons.take(count).toList(), size: _iconSize, step: _step, maxWidth: max(0.0, room)),
+                  // The text always sits at the right edge.
+                  const Spacer(),
+                  Text(label, style: textStyle),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -572,7 +563,9 @@ class _PackCardBar extends StatelessWidget {
 
 /// Overlapping difficulty icons.
 ///
-/// When the pack contents first arrive, the icons pop in one by one from the left.
+/// Dozens of overlapping icons are expensive to draw, so they are baked into one image once ([RasterSnapshot]).
+/// When the pack contents first arrive, that image wipes in from the left: only the clip
+/// changes each frame, so cards appearing together while scrolling stay cheap.
 /// Packs fetched earlier show their icons right away without the animation.
 /// Beyond [maxWidth], the right edge fades out like other overflowing content (without moving).
 class _IconStrip extends StatefulWidget {
@@ -588,19 +581,17 @@ class _IconStrip extends StatefulWidget {
 }
 
 class _IconStripState extends State<_IconStrip> with SingleTickerProviderStateMixin {
-  /// How long one icon takes to appear, and the delay before the next one follows.
-  static const _each = Durations.medium1;
-  static const _stagger = Duration(milliseconds: 22);
-
   /// Starts finished (1) if the icons were there from the start.
   /// It must be created in initState: created lazily (late), it would only be created once icons appear,
   /// wrongly conclude they were there from the start, and skip the animation.
   late final AnimationController _controller;
+  late final CurvedAnimation _curved;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, value: widget.icons.isEmpty ? 0 : 1);
+    _controller = AnimationController(vsync: this, duration: Durations.medium4, value: widget.icons.isEmpty ? 0 : 1);
+    _curved = CurvedAnimation(parent: _controller, curve: Motion.enter);
   }
 
   bool _preparing = false;
@@ -621,12 +612,12 @@ class _IconStripState extends State<_IconStrip> with SingleTickerProviderStateMi
     await NetworkIcon.precache(context, widget.icons, _StackedIcon.iconSize(widget.size));
     _preparing = false;
     if (!mounted) return;
-    _controller.duration = _each + _stagger * (widget.icons.length - 1);
     await _controller.forward().orCancel.catchError((_) {});
   }
 
   @override
   void dispose() {
+    _curved.dispose();
     _controller.dispose();
     super.dispose();
   }
@@ -636,64 +627,64 @@ class _IconStripState extends State<_IconStrip> with SingleTickerProviderStateMi
     final icons = widget.icons;
     if (icons.isEmpty) return const SizedBox.shrink();
 
-    final totalMs = (_each + _stagger * (icons.length - 1)).inMilliseconds;
     final full = widget.size + (icons.length - 1) * widget.step;
 
-    return SizedBox(
-      // Takes only what it needs, or the available width when overflowing. FadeEdges fades the overflowing end.
-      width: min(full, widget.maxWidth),
-      height: widget.size,
-      child: FadeEdges(
+    // The animation lives outside the baked image, so the image is drawn once and only reclipped.
+    // (A fade would need an extra layer per card every frame, which costs more than the clip.)
+    return ClipRect(
+      clipper: _WipeClipper(_curved),
+      child: RasterSnapshot(
         child: SizedBox(
-          width: full,
+          // Takes only what it needs, or the available width when overflowing. FadeEdges fades the overflowing end.
+          width: min(full, widget.maxWidth),
           height: widget.size,
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, _) => Stack(
-              children: [
-                for (var i = 0; i < icons.length; i++)
-                  Positioned(
-                    left: i * widget.step,
-                    child: _appearing(
-                      Interval(
-                        (_stagger.inMilliseconds * i) / totalMs,
-                        (_stagger.inMilliseconds * i + _each.inMilliseconds) / totalMs,
-                      ).transform(_controller.value),
-                      (opacity) => _StackedIcon(url: icons[i], size: widget.size, opacity: opacity),
+          child: FadeEdges(
+            child: SizedBox(
+              width: full,
+              height: widget.size,
+              child: Stack(
+                children: [
+                  for (var i = 0; i < icons.length; i++)
+                    Positioned(
+                      left: i * widget.step,
+                      child: _StackedIcon(url: icons[i], size: widget.size),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  /// Fades in and scales up slightly as [t] goes from 0 to 1; adds nothing once fully shown.
-  /// Opacity is applied when painting the icon instead of with an Opacity
-  /// layer, because this strip is baked into one image.
-  static Widget _appearing(double t, Widget Function(double opacity) icon) {
-    if (t >= 1) return icon(1);
-    if (t <= 0) return const SizedBox.shrink();
-    return Transform.scale(scale: 0.6 + 0.4 * Motion.enter.transform(t), child: icon(Motion.standard.transform(t)));
-  }
+/// Shows the left [progress] fraction of its child.
+class _WipeClipper extends CustomClipper<Rect> {
+  _WipeClipper(this.progress) : super(reclip: progress);
+
+  final Animation<double> progress;
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width * progress.value, size.height);
+
+  @override
+  bool shouldReclip(_WipeClipper oldClipper) => oldClipper.progress != progress;
 }
 
 /// One overlapping icon, ringed in the card color to separate it from the icon behind.
 class _StackedIcon extends StatelessWidget {
-  const _StackedIcon({required this.url, required this.size, this.opacity = 1});
+  const _StackedIcon({required this.url, required this.size});
 
   /// Icon size without the ring. Precaching must use the same size to hit the same cached image.
   static double iconSize(double size) => size - 3;
 
   final String? url;
   final double size;
-  final double opacity;
 
   @override
   Widget build(BuildContext context) {
-    final back = Theme.of(context).colorScheme.surfaceContainerLow.withValues(alpha: opacity);
+    final back = Theme.of(context).colorScheme.surfaceContainerLow;
     return Container(
       width: size,
       height: size,
@@ -702,7 +693,7 @@ class _StackedIcon extends StatelessWidget {
         color: back,
         border: Border.all(color: back, width: 1.5),
       ),
-      child: NetworkIcon(url, size: iconSize(size), opacity: opacity),
+      child: NetworkIcon(url, size: iconSize(size)),
     );
   }
 }
@@ -876,31 +867,78 @@ class _LevelRow extends _Row {
   final PackLevelEntry entry;
 }
 
+/// Only the first [_animatedRows] rows inside folders that are opening ([growing]) or closing animate, counted
+/// across all of them (Expand all opens dozens at once); the rest are left out until they have opened, and
+/// dropped as soon as they start closing. Animating them all would build every one of them in a single frame:
+/// rows start at zero height, so the list keeps building rows to fill the screen.
 List<_Row> _flatten(
   List<PackNode> nodes, {
   required Set<int> expanded,
   required Set<int> closing,
   required Set<int> opening,
-  int depth = 0,
-  bool visible = true,
-}) => [
-  for (final node in nodes)
-    ...switch (node) {
-      PackFolder() => [
-        _FolderRow(node, depth, visible: visible),
-        if (expanded.contains(node.id) || closing.contains(node.id))
-          ..._flatten(
-            node.children,
-            expanded: expanded,
-            closing: closing,
-            opening: opening,
-            depth: depth + 1,
-            visible: visible && expanded.contains(node.id) && !opening.contains(node.id),
-          ),
-      ],
-      PackLevelEntry() => [_LevelRow(node, depth, visible: visible)],
-    },
-];
+  required Set<int> growing,
+}) => _flattenInto(
+  [],
+  nodes,
+  expanded: expanded,
+  closing: closing,
+  opening: opening,
+  growing: growing,
+  budget: _AnimatedRows(),
+  depth: 0,
+  visible: true,
+  animating: false,
+);
+
+List<_Row> _flattenInto(
+  List<_Row> rows,
+  List<PackNode> nodes, {
+  required Set<int> expanded,
+  required Set<int> closing,
+  required Set<int> opening,
+  required Set<int> growing,
+  required _AnimatedRows budget,
+  required int depth,
+  required bool visible,
+  required bool animating,
+}) {
+  for (final node in nodes) {
+    if (animating) {
+      if (budget.left == 0) break;
+      budget.left--;
+    }
+    switch (node) {
+      case PackLevelEntry():
+        rows.add(_LevelRow(node, depth, visible: visible));
+      case PackFolder():
+        rows.add(_FolderRow(node, depth, visible: visible));
+        final open = expanded.contains(node.id);
+        final closes = closing.contains(node.id);
+        if (!open && !closes) continue;
+        _flattenInto(
+          rows,
+          node.children,
+          expanded: expanded,
+          closing: closing,
+          opening: opening,
+          growing: growing,
+          budget: budget,
+          depth: depth + 1,
+          visible: visible && open && !opening.contains(node.id),
+          animating: animating || closes || growing.contains(node.id),
+        );
+    }
+  }
+  return rows;
+}
+
+/// How many rows animate when folders open or close. More than fit on screen.
+const _animatedRows = 24;
+
+/// Rows left to animate in the folders being opened or closed.
+class _AnimatedRows {
+  int left = _animatedRows;
+}
 
 class _PackDetailView extends StatefulWidget {
   const _PackDetailView({super.key, required this.packs});
@@ -920,9 +958,11 @@ class _PackDetailViewState extends State<_PackDetailView> {
   /// Expanded folders as of the last change, to tell which folders just opened or closed.
   late Set<int> _expanded;
 
-  /// Folders whose rows are still animating closed, and folders whose rows wait one frame before animating open.
+  /// Folders whose rows are still animating closed, folders whose rows wait one frame before animating open,
+  /// and folders still animating open.
   final _closing = <int>{};
   final _opening = <int>{};
+  final _growing = <int>{};
 
   @override
   void initState() {
@@ -950,6 +990,9 @@ class _PackDetailViewState extends State<_PackDetailView> {
       _opening
         ..addAll(opened)
         ..removeAll(closed);
+      _growing
+        ..addAll(opened)
+        ..removeAll(closed);
       _closing
         ..addAll(closed)
         ..removeAll(opened);
@@ -959,13 +1002,16 @@ class _PackDetailViewState extends State<_PackDetailView> {
         if (mounted) setState(() => _opening.removeAll(opened));
       });
     }
-    if (closed.isNotEmpty) {
-      // A little longer than the animation, which starts on the next frame.
-      Timer(Motion.medium + const Duration(milliseconds: 50), () {
-        // Only drop the rows if the folder wasn't reopened meanwhile.
-        if (mounted) setState(() => _closing.removeAll(closed.difference(widget.packs.expanded)));
+    // A little longer than the animation, which starts on the next frame.
+    Timer(Motion.medium + const Duration(milliseconds: 50), () {
+      if (!mounted) return;
+      setState(() {
+        // Then the rest of an opened folder's rows join, and a closed folder's rows leave
+        // (unless it was toggled again meanwhile).
+        _growing.removeAll(opened.intersection(widget.packs.expanded));
+        _closing.removeAll(closed.difference(widget.packs.expanded));
       });
-    }
+    });
   }
 
   @override
@@ -983,7 +1029,13 @@ class _PackDetailViewState extends State<_PackDetailView> {
         builder: (context, _) {
           final rows = detail == null
               ? const <_Row>[]
-              : _flatten(detail.items, expanded: packs.expanded, closing: _closing, opening: _opening);
+              : _flatten(
+                  detail.items,
+                  expanded: packs.expanded,
+                  closing: _closing,
+                  opening: _opening,
+                  growing: _growing,
+                );
 
           return ColoredBox(
             color: Theme.of(context).scaffoldBackgroundColor,
