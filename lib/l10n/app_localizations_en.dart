@@ -2197,4 +2197,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancelled => 'Cancelled';
+
+  @override
+  String get lowestDifficulty => 'Lowest difficulty';
+
+  @override
+  String get highestDifficulty => 'Highest difficulty';
 }

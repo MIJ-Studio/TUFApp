@@ -545,5 +545,7 @@
   "levelSortRandom": "무작위",
   "hidden": "히든",
   "extra": "엑스트라",
-  "cancelled": "취소됨"
+  "cancelled": "취소됨",
+  "lowestDifficulty": "최저 난이도",
+  "highestDifficulty": "최고 난이도"
 }

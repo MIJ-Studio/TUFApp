@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tufapp/core/models/difficulty.dart';
 import 'package:tufapp/ui/widgets/difficulty_slider.dart';
@@ -62,5 +63,52 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(calls, isEmpty);
+  });
+
+  testWidgets('Tab으로 노브에 가서 키보드로 움직이고, 키를 멈추면 한 번만 알린다', (tester) async {
+    final calls = await pumpSlider(tester);
+    double ring(int knob) => tester.widgetList<AnimatedOpacity>(find.byType(AnimatedOpacity)).elementAt(knob).opacity;
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect((ring(0), ring(1)), (1, 0), reason: '아래쪽 노브에 포커스 링');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(calls, isEmpty, reason: '누르는 동안에는 검색하지 않는다');
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(calls, [(2, 4)]);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect((ring(0), ring(1)), (0, 1), reason: '위쪽 노브로 넘어간다');
+    await tester.sendKeyEvent(LogicalKeyboardKey.home);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(calls.last, (2, 2), reason: '위쪽 노브는 아래쪽 노브를 넘지 않는다');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pumpAndSettle(const Duration(milliseconds: 500));
+    expect(calls.last, (2, 4), reason: 'Page Up은 다섯 칸, 끝에서 멈춘다');
+  });
+
+  testWidgets('화면 낭독기에 슬라이더로 알린다', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await pumpSlider(tester, lower: 1, upper: 3);
+    expect(
+      tester.getSemantics(find.byType(FocusableActionDetector).first),
+      matchesSemantics(
+        isSlider: true,
+        isFocusable: true,
+        hasFocusAction: true,
+        hasIncreaseAction: true,
+        hasDecreaseAction: true,
+        label: '최저 난이도',
+        value: 'P1',
+        increasedValue: 'P2',
+        decreasedValue: 'P0',
+      ),
+    );
+    semantics.dispose();
   });
 }

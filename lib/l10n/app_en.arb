@@ -1513,5 +1513,7 @@
   "levelSortRandom": "Random",
   "hidden": "Hidden",
   "extra": "Extra",
-  "cancelled": "Cancelled"
+  "cancelled": "Cancelled",
+  "lowestDifficulty": "Lowest difficulty",
+  "highestDifficulty": "Highest difficulty"
 }

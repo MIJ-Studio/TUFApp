@@ -3383,6 +3383,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancelled'**
   String get cancelled;
+
+  /// No description provided for @lowestDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowest difficulty'**
+  String get lowestDifficulty;
+
+  /// No description provided for @highestDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest difficulty'**
+  String get highestDifficulty;
 }
 
 class _AppLocalizationsDelegate

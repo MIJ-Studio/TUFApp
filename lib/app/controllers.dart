@@ -776,6 +776,10 @@ class LibraryController extends ChangeNotifier {
   /// Anchor entry for Shift range selection.
   String? _selectionAnchor;
 
+  /// The entry selected last (the moving end of a Shift range); arrow keys move from here.
+  String? get selectionCursor => _selectionCursor;
+  String? _selectionCursor;
+
   LibrarySort sort = LibrarySort.name;
 
   /// Entries in the chosen sort order, folders first.
@@ -816,6 +820,7 @@ class LibraryController extends ChangeNotifier {
 
   /// Explorer-style selection: click selects one, Ctrl toggles, Shift selects a range.
   void select(LibraryEntry entry, {bool toggle = false, bool range = false}) {
+    _selectionCursor = entry.relativePath;
     final all = entries;
     if (range && _selectionAnchor != null) {
       final from = all.indexWhere((item) => item.relativePath == _selectionAnchor);
@@ -850,7 +855,7 @@ class LibraryController extends ChangeNotifier {
   void clearSelection() {
     if (selection.isEmpty) return;
     selection.clear();
-    _selectionAnchor = null;
+    _selectionAnchor = _selectionCursor = null;
     _selectionChanged();
   }
 

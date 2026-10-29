@@ -334,6 +334,7 @@ class _SocialButton extends StatefulWidget {
 
 class _SocialButtonState extends State<_SocialButton> {
   bool _hovered = false;
+  bool _focused = false;
 
   @override
   Widget build(BuildContext context) {
@@ -348,24 +349,43 @@ class _SocialButtonState extends State<_SocialButton> {
       _ => BorderRadius.circular(size),
     };
 
+    void open() => _openExternal(context, link.url);
+    final highlighted = _hovered || _focused;
+
     return HoverTip(
       message: label,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
+      // Focusable like the website's links: Tab reaches it, Enter or Space opens it, and focus draws a ring.
+      child: FocusableActionDetector(
+        mouseCursor: SystemMouseCursors.click,
+        onShowHoverHighlight: (hovered) => setState(() => _hovered = hovered),
+        onShowFocusHighlight: (focused) => setState(() => _focused = focused),
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => open()),
+          ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) => open()),
+        },
         child: GestureDetector(
-          onTap: () => _openExternal(context, link.url),
+          onTap: open,
           child: AnimatedContainer(
             duration: Motion.fast,
+            curve: Motion.standard,
             width: block.showLabels ? null : size,
             height: size,
             padding: block.showLabels ? EdgeInsets.symmetric(horizontal: fontSize * 0.85) : null,
             decoration: BoxDecoration(
-              color: _hovered ? _BioColors.hover : _BioColors.surface,
-              border: Border.all(color: _hovered ? _BioColors.hoverBorder : _BioColors.border),
+              color: highlighted ? _BioColors.hover : _BioColors.surface,
+              border: Border.all(color: highlighted ? _BioColors.hoverBorder : _BioColors.border),
               borderRadius: radius,
             ),
+            foregroundDecoration: _focused
+                ? BoxDecoration(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.secondary,
+                      width: 3,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
+                    borderRadius: radius,
+                  )
+                : null,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,

@@ -30,6 +30,7 @@ Widget _section(Widget child) => SliverToBoxAdapter(child: _constrain(child));
 /// - Click to select (Ctrl toggles, Shift selects a range), double-click to open
 /// - Drag onto a folder or the path to move
 /// - Context menu, F2 (rename) / Delete / Backspace (up) / Ctrl+A (select all) / Esc (deselect)
+/// - ↑/↓/Home/End select an entry (Shift extends the range), Enter opens it
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
 
@@ -69,11 +70,53 @@ class _LibraryPageState extends State<LibraryPage> {
         _deleteMany(context, library, selected);
       case LogicalKeyboardKey.enter when selected.length == 1:
         _open(library, selected.single);
+      case LogicalKeyboardKey.arrowUp ||
+              LogicalKeyboardKey.arrowDown ||
+              LogicalKeyboardKey.home ||
+              LogicalKeyboardKey.end
+          when !control:
+        _moveCursor(library, event.logicalKey);
       default:
         return KeyEventResult.ignored;
     }
     return KeyEventResult.handled;
   }
+
+  /// Arrow keys and Home/End select the next entry like Explorer; with Shift they extend the range.
+  void _moveCursor(LibraryController library, LogicalKeyboardKey key) {
+    final entries = library.entries;
+    if (entries.isEmpty) return;
+    final current = entries.indexWhere((entry) => entry.relativePath == library.selectionCursor);
+    final index = switch (key) {
+      LogicalKeyboardKey.home => 0,
+      LogicalKeyboardKey.end => entries.length - 1,
+      LogicalKeyboardKey.arrowUp => current < 0 ? entries.length - 1 : current - 1,
+      _ => current + 1,
+    }.clamp(0, entries.length - 1);
+    library.select(entries[index], range: HardwareKeyboard.instance.isShiftPressed);
+
+    // Rows far away aren't built yet, so they can't scroll themselves into view.
+    if (key == LogicalKeyboardKey.home) _scroll.glideTo(0);
+    if (key == LogicalKeyboardKey.end && _scroll.hasClients) _scroll.glideTo(_scroll.position.maxScrollExtent);
+  }
+
+  /// Scrolls just enough to show a row that became the selection cursor, clear of the floating selection bar.
+  void _reveal(BuildContext row) {
+    final box = row.findRenderObject();
+    final viewport = _scroll.hasClients ? _scroll.position.context.notificationContext?.findRenderObject() : null;
+    if (box is! RenderBox || viewport is! RenderBox || !box.attached) return;
+    final top = box.localToGlobal(Offset.zero, ancestor: viewport).dy;
+    final bottom = top + box.size.height;
+    final visibleBottom = viewport.size.height - _selectionBarSpace;
+    if (top < 0) {
+      _scroll.glideBy(top - 8);
+    } else if (bottom > visibleBottom) {
+      _scroll.glideBy(bottom - visibleBottom + 8);
+    }
+  }
+
+  /// Height the floating selection bar covers at the bottom of the list.
+  static const _selectionBarSpace = 88.0;
 
   void _open(LibraryController library, LibraryEntry entry) {
     if (entry is FolderEntry) {
@@ -160,6 +203,7 @@ class _LibraryPageState extends State<LibraryPage> {
                                     library: library,
                                     focus: _focus,
                                     onOpen: () => _open(library, entry),
+                                    onBecameCursor: _reveal,
                                   ),
                                 ),
                               ),
@@ -167,7 +211,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           },
                         ),
                         // Leave room so the floating selection bar doesn't cover the last entry.
-                        _section(const SizedBox(height: 88)),
+                        _section(const SizedBox(height: _selectionBarSpace)),
                       ],
                     ),
                   ),
@@ -198,12 +242,21 @@ class _LibraryPageState extends State<LibraryPage> {
 
 /// A row with selection, dragging and a context menu. Folders also accept drops.
 class _EntryRow extends StatefulWidget {
-  const _EntryRow({required this.entry, required this.library, required this.focus, required this.onOpen});
+  const _EntryRow({
+    required this.entry,
+    required this.library,
+    required this.focus,
+    required this.onOpen,
+    required this.onBecameCursor,
+  });
 
   final LibraryEntry entry;
   final LibraryController library;
   final FocusNode focus;
   final VoidCallback onOpen;
+
+  /// Called with this row's context when it becomes the selection cursor, to scroll it into view.
+  final void Function(BuildContext row) onBecameCursor;
 
   @override
   State<_EntryRow> createState() => _EntryRowState();
@@ -216,6 +269,9 @@ class _EntryRowState extends State<_EntryRow> {
 
   /// Selection state at the last build.
   late bool _wasSelected = _selected;
+
+  /// Whether this row was the selection cursor at the last selection change.
+  late bool _wasCursor = widget.library.selectionCursor == widget.entry.relativePath;
 
   @override
   void initState() {
@@ -241,6 +297,14 @@ class _EntryRowState extends State<_EntryRow> {
   /// Rebuilds only rows whose selection changed instead of the whole page.
   /// Selected rows also rebuild because the group they drag changes.
   void _onSelectionChanged() {
+    final cursor = widget.library.selectionCursor == widget.entry.relativePath;
+    if (cursor && !_wasCursor) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onBecameCursor(context);
+      });
+    }
+    _wasCursor = cursor;
+
     final selected = _selected;
     if (selected == _wasSelected && !selected) return;
     setState(() {});
@@ -890,7 +954,7 @@ class _FloatingSelectionBar extends StatelessWidget {
       child: AnimatedOpacity(
         opacity: visible ? 1 : 0,
         duration: Motion.fast,
-        curve: Motion.curve,
+        curve: Motion.standard,
         // Keep taps on the bar's empty space from reaching the "click empty space to deselect" handler behind it.
         child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () {}, child: child),
       ),

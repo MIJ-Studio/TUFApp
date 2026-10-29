@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../../core/l10n.dart';
 import '../../core/models/difficulty.dart';
 import '../theme.dart';
 import 'common.dart';
@@ -14,6 +17,8 @@ import 'motion.dart';
 ///
 /// - While dragging, the knob follows the pointer and [onChanged] fires once on release (so there is one search).
 /// - When the value changes from outside (a reset, etc.), the knobs and range animate smoothly.
+/// - Like a Material 3 slider, each knob takes keyboard focus: arrows move one step, Page Up/Down five,
+///   Home/End to the ends, and [onChanged] fires once the keys settle.
 class DifficultySlider extends StatefulWidget {
   const DifficultySlider({
     super.key,
@@ -49,6 +54,28 @@ class _DifficultySliderState extends State<DifficultySlider> {
   /// 0: the grabbed knob is [_lower], 1: [_upper], null: not dragging
   int? _dragKnob;
 
+  /// Keyboard focus for the lower (0) and upper (1) knob.
+  late final _knobFocus = [FocusNode(debugLabel: 'lowest difficulty'), FocusNode(debugLabel: 'highest difficulty')];
+
+  /// The knob showing a keyboard focus ring, if any.
+  int? _focusedKnob;
+
+  /// Reports keyboard moves once the keys settle, so holding an arrow doesn't search at every step.
+  Timer? _keyCommit;
+  static const _keyCommitDelay = Duration(milliseconds: 400);
+  static const _pageStep = 5;
+
+  static const _keys = <ShortcutActivator, Intent>{
+    SingleActivator(LogicalKeyboardKey.arrowLeft): _StepIntent(-1),
+    SingleActivator(LogicalKeyboardKey.arrowDown): _StepIntent(-1),
+    SingleActivator(LogicalKeyboardKey.arrowRight): _StepIntent(1),
+    SingleActivator(LogicalKeyboardKey.arrowUp): _StepIntent(1),
+    SingleActivator(LogicalKeyboardKey.pageDown): _StepIntent(-_pageStep),
+    SingleActivator(LogicalKeyboardKey.pageUp): _StepIntent(_pageStep),
+    SingleActivator(LogicalKeyboardKey.home): _StepIntent.toStart,
+    SingleActivator(LogicalKeyboardKey.end): _StepIntent.toEnd,
+  };
+
   int get _maxIndex => max(0, widget.difficulties.length - 1);
 
   int _clamp(int index) => index.clamp(0, _maxIndex);
@@ -56,10 +83,34 @@ class _DifficultySliderState extends State<DifficultySlider> {
   @override
   void didUpdateWidget(DifficultySlider oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_dragKnob == null) {
+    if (_dragKnob == null && !(_keyCommit?.isActive ?? false)) {
       _lower = _clamp(widget.lower);
       _upper = _clamp(widget.upper);
     }
+  }
+
+  @override
+  void dispose() {
+    _keyCommit?.cancel();
+    for (final node in _knobFocus) {
+      node.dispose();
+    }
+    super.dispose();
+  }
+
+  /// Moves a knob by [delta] steps from the keyboard. The lower knob can't pass the upper one and vice versa.
+  void _step(int knob, int delta) {
+    setState(() {
+      if (knob == 0) {
+        _lower = (_lower + delta).clamp(0, _upper);
+      } else {
+        _upper = (_upper + delta).clamp(_lower, _maxIndex);
+      }
+    });
+    _keyCommit?.cancel();
+    _keyCommit = Timer(_keyCommitDelay, () {
+      if (mounted && (_lower != widget.lower || _upper != widget.upper)) widget.onChanged(_lower, _upper);
+    });
   }
 
   static double xAt(double index, int count, double width) {
@@ -156,8 +207,8 @@ class _DifficultySliderState extends State<DifficultySlider> {
                           painter: _TrackPainter(colors: colors, low: low, high: high),
                         ),
                       ),
-                      ..._knob(context, list, colors, low, width, active: draggingLow),
-                      ..._knob(context, list, colors, high, width, active: dragging && !draggingLow),
+                      ..._knob(context, list, colors, low, width, knob: 0, active: draggingLow),
+                      ..._knob(context, list, colors, high, width, knob: 1, active: dragging && !draggingLow),
                     ],
                   ),
                 ),
@@ -175,6 +226,7 @@ class _DifficultySliderState extends State<DifficultySlider> {
     List<Color> colors,
     double position,
     double width, {
+    required int knob,
     required bool active,
   }) {
     final index = position.round().clamp(0, list.length - 1);
@@ -202,23 +254,69 @@ class _DifficultySliderState extends State<DifficultySlider> {
       Positioned(
         left: x - _knobSize / 2,
         top: trackTop + trackHeight / 2 - _knobSize / 2,
-        child: IgnorePointer(
-          child: AnimatedScale(
-            scale: active ? 1.15 : 1,
-            duration: Durations.short3,
-            curve: Motion.standard,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: active ? 10 : 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+        child: Semantics(
+          slider: true,
+          label: knob == 0 ? l10n.lowestDifficulty : l10n.highestDifficulty,
+          value: difficulty.name,
+          increasedValue: list[min(index + 1, list.length - 1)].name,
+          decreasedValue: list[max(index - 1, 0)].name,
+          onIncrease: () => _step(knob, 1),
+          onDecrease: () => _step(knob, -1),
+          child: FocusableActionDetector(
+            focusNode: _knobFocus[knob],
+            shortcuts: _keys,
+            actions: {_StepIntent: CallbackAction<_StepIntent>(onInvoke: (intent) => _step(knob, intent.delta))},
+            onShowFocusHighlight: (focused) => setState(() {
+              if (focused) {
+                _focusedKnob = knob;
+              } else if (_focusedKnob == knob) {
+                _focusedKnob = null;
+              }
+            }),
+            // The whole slider handles the pointer; the knob only takes keyboard focus.
+            child: IgnorePointer(
+              child: AnimatedScale(
+                scale: active ? 1.15 : 1,
+                duration: Durations.short3,
+                curve: Motion.standard,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.35),
+                            blurRadius: active ? 10 : 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: NetworkIcon(difficulty.icon, size: _knobSize),
+                    ),
+                    // Material 3 focus indicator: 3 dp ring, 2 dp outside the knob.
+                    Positioned(
+                      left: -5,
+                      top: -5,
+                      right: -5,
+                      bottom: -5,
+                      child: AnimatedOpacity(
+                        opacity: _focusedKnob == knob ? 1 : 0,
+                        duration: Motion.fast,
+                        curve: Motion.standard,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Theme.of(context).colorScheme.secondary, width: 3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              child: NetworkIcon(difficulty.icon, size: _knobSize),
             ),
           ),
         ),
@@ -321,4 +419,14 @@ class _TrackPainter extends CustomPainter {
   @override
   bool shouldRepaint(_TrackPainter oldDelegate) =>
       oldDelegate.low != low || oldDelegate.high != high || !listEquals(oldDelegate.colors, colors);
+}
+
+/// Moves a slider knob from the keyboard by [delta] steps (clamped to the ends).
+class _StepIntent extends Intent {
+  const _StepIntent(this.delta);
+
+  final int delta;
+
+  static const toStart = _StepIntent(-1 << 20);
+  static const toEnd = _StepIntent(1 << 20);
 }

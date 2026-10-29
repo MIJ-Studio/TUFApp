@@ -1973,4 +1973,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get cancelled => '취소됨';
+
+  @override
+  String get lowestDifficulty => '최저 난이도';
+
+  @override
+  String get highestDifficulty => '최고 난이도';
 }

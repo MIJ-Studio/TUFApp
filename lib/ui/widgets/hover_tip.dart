@@ -72,11 +72,25 @@ class _HoverTipState extends State<HoverTip> {
     if (identical(_shown, this)) _shown = null;
   }
 
+  /// Like Material tooltips, keyboard focus on the wrapped control shows the tip too.
+  void _onFocusChange(bool focused) {
+    if (focused && FocusManager.instance.highlightMode == FocusHighlightMode.traditional) {
+      _schedule();
+    } else if (!focused) {
+      _hide();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => MouseRegion(
-    onEnter: (_) => _schedule(),
-    onExit: (_) => _hide(),
-    child: Listener(onPointerDown: (_) => _hide(), child: widget.child),
+  Widget build(BuildContext context) => Focus(
+    canRequestFocus: false,
+    skipTraversal: true,
+    onFocusChange: _onFocusChange,
+    child: MouseRegion(
+      onEnter: (_) => _schedule(),
+      onExit: (_) => _hide(),
+      child: Listener(onPointerDown: (_) => _hide(), child: widget.child),
+    ),
   );
 }
 
