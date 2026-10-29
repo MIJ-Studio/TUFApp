@@ -117,7 +117,7 @@ class _TipBubble extends StatelessWidget {
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 120),
+      duration: Durations.short3,
       builder: (context, value, child) => Opacity(opacity: value, child: child),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 360),

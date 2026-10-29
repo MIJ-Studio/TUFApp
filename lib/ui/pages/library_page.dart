@@ -400,7 +400,7 @@ class _EntryCard extends StatelessWidget {
 
     return AnimatedContainer(
       duration: Motion.fast,
-      curve: Curves.easeOut,
+      curve: Motion.standard,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: highlighted

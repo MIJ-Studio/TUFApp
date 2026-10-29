@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n.dart';
 import '../../../core/profile_stats.dart';
 import '../../widgets/common.dart';
+import '../../widgets/motion.dart';
 
 /// Chart colors, taken from the app theme.
 class _ChartColors {
@@ -94,8 +95,8 @@ class _DifficultyBarChartState extends State<DifficultyBarChart> {
                     // Bars grow when first shown and when values change (like the website's recharts).
                     key: ValueKey(Object.hashAll(bars.map((bar) => bar.count))),
                     tween: Tween(begin: 0, end: 1),
-                    duration: const Duration(milliseconds: 700),
-                    curve: Curves.easeOutCubic,
+                    duration: Durations.extralong1,
+                    curve: Motion.enter,
                     builder: (context, progress, _) => CustomPaint(
                       painter: _BarPainter(layout: layout, hover: hover, progress: progress, colors: colors),
                     ),
@@ -226,8 +227,8 @@ class _BarPainter extends CustomPainter {
       canvas.drawRRect(
         RRect.fromRectAndCorners(
           layout.barRect(i, progress),
-          topLeft: const Radius.circular(3),
-          topRight: const Radius.circular(3),
+          topLeft: const Radius.circular(4),
+          topRight: const Radius.circular(4),
         ),
         Paint()..color = _hex(bar.difficulty.color, const Color(0xFFFF2AD1)),
       );
@@ -299,8 +300,8 @@ class _RankHistoryChartState extends State<RankHistoryChart> {
                 child: TweenAnimationBuilder<double>(
                   key: ValueKey(Object.hashAll(widget.points.map((point) => point.rank))),
                   tween: Tween(begin: 0, end: 1),
-                  duration: const Duration(milliseconds: 900),
-                  curve: Curves.easeOutCubic,
+                  duration: Durations.extralong3,
+                  curve: Motion.enter,
                   builder: (context, progress, _) => CustomPaint(
                     painter: _LinePainter(layout: layout, hover: hover, progress: progress, colors: colors),
                   ),

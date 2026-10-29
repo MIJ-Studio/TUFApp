@@ -512,7 +512,7 @@ class _PassRow extends StatelessWidget {
       title: HoverTip(
         message: l10n.viewPlayerProfile,
         child: InkWell(
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           onTap: openPlayer,
           child: Row(
             mainAxisSize: MainAxisSize.min,

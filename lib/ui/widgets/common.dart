@@ -4,6 +4,7 @@ import '../../app/controllers.dart';
 import '../../core/image_cache_store.dart';
 import '../../core/l10n.dart';
 import 'hover_tip.dart';
+import 'motion.dart';
 
 /// Difficulty or tag icon. Leaves an empty slot if it can't be loaded.
 class NetworkIcon extends StatefulWidget {
@@ -41,8 +42,8 @@ class _NetworkIconState extends State<NetworkIcon> with SingleTickerProviderStat
   /// Fades in only on the first load; cached icons are drawn right away.
   /// Opacity is applied while painting. A layer like AnimatedOpacity makes lists with many icons expensive to draw,
   /// and can freeze half-faded inside a baked row ([RasterSnapshot]).
-  late final _fade = AnimationController(vsync: this, duration: const Duration(milliseconds: 200));
-  late final _curve = CurvedAnimation(parent: _fade, curve: Curves.easeOut);
+  late final _fade = AnimationController(vsync: this, duration: Durations.short4);
+  late final _curve = CurvedAnimation(parent: _fade, curve: Motion.enter);
   bool _shown = false;
 
   @override
@@ -144,7 +145,7 @@ class JobProgressIndicator extends StatelessWidget {
               if (job.fraction case final fraction?)
                 TweenAnimationBuilder<double>(
                   tween: Tween(end: fraction),
-                  duration: const Duration(milliseconds: 200),
+                  duration: Durations.short4,
                   builder: (context, value, _) => LinearProgressIndicator(value: value),
                 )
               else

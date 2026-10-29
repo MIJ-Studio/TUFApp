@@ -46,7 +46,7 @@ class VideoBackdrop extends StatelessWidget {
   Widget _image(String url) => AnimatedOpacity(
     opacity: hovered ? _hoveredOpacity : _opacity,
     duration: Motion.medium,
-    curve: Curves.easeOut,
+    curve: Motion.standard,
     child: Image(
       image: DiskCachedImage(url, maxWidth: _decodeWidth, blurSigma: _blurSigma),
       fit: BoxFit.cover,
@@ -57,7 +57,7 @@ class VideoBackdrop extends StatelessWidget {
       gaplessPlayback: true,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) => wasSynchronouslyLoaded
           ? child
-          : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: Motion.slow, curve: Curves.easeOut, child: child),
+          : AnimatedOpacity(opacity: frame == null ? 0 : 1, duration: Motion.slow, curve: Motion.enter, child: child),
       errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
     ),
   );

@@ -3,6 +3,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import 'motion.dart';
+
 /// Softly fades out the overflowing end, **horizontally only**, when content is wider than its box.
 /// The child is laid out without a width limit, so it can hold widgets that break when squeezed, like a Row.
 ///
@@ -181,7 +183,7 @@ class _SlideOverflowState extends State<SlideOverflow> with SingleTickerProvider
   static const _speedPerSecond = 60.0;
 
   /// Returning is fast.
-  static const _returnDuration = Duration(milliseconds: 300);
+  static const _returnDuration = Durations.medium2;
 
   late final AnimationController _controller = AnimationController(vsync: this);
   final _key = GlobalKey();
@@ -210,7 +212,7 @@ class _SlideOverflowState extends State<SlideOverflow> with SingleTickerProvider
     _controller.animateTo(
       1,
       duration: Duration(milliseconds: ms),
-      curve: Curves.easeInOut,
+      curve: Motion.standard,
     );
   }
 
@@ -218,7 +220,7 @@ class _SlideOverflowState extends State<SlideOverflow> with SingleTickerProvider
     if (!_hovered) return;
     _hovered = false;
     if (_controller.value == 0 && !_controller.isAnimating) return;
-    _controller.animateTo(0, duration: _returnDuration, curve: Curves.easeOut);
+    _controller.animateTo(0, duration: _returnDuration, curve: Motion.standard);
   }
 
   @override

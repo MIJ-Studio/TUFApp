@@ -2,12 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-/// Animation durations and curves shared across the app.
+/// Animation durations and easing shared across the app, from the Material 3 motion tokens
+/// (Flutter's [Durations] and [Easing]).
 abstract final class Motion {
-  static const fast = Duration(milliseconds: 150);
-  static const medium = Duration(milliseconds: 250);
-  static const slow = Duration(milliseconds: 350);
-  static const curve = Curves.easeOutCubic;
+  static const fast = Durations.short3; // 150 ms
+  static const medium = Durations.medium1; // 250 ms
+  static const slow = Durations.medium3; // 350 ms
+
+  /// Something on screen moves or changes size, starting and ending on screen (M3 "emphasized").
+  static const curve = Curves.easeInOutCubicEmphasized;
+
+  /// Something appears or grows into view (M3 "emphasized decelerate").
+  static const enter = Easing.emphasizedDecelerate;
+
+  /// Something leaves or shrinks out of view (M3 "emphasized accelerate").
+  static const exit = Easing.emphasizedAccelerate;
+
+  /// [exit] for animations that run backwards (a reversing controller, AnimatedSwitcher's outgoing child).
+  static const exitReversed = FlippedCurve(exit);
+
+  /// Small utility changes such as colors, opacity and state layers (M3 "standard").
+  static const standard = Easing.standard;
 }
 
 /// Cross-fades when the content changes. The child needs a different key or widget type to switch.
@@ -30,8 +45,8 @@ class FadeSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AnimatedSwitcher(
     duration: duration,
-    switchInCurve: Motion.curve,
-    switchOutCurve: Curves.easeIn,
+    switchInCurve: Motion.enter,
+    switchOutCurve: Motion.exitReversed,
     layoutBuilder: (current, previous) => Stack(alignment: alignment, children: [...previous, ?current]),
     transitionBuilder: (child, animation) {
       final faded = FadeTransition(opacity: animation, child: child);
@@ -62,8 +77,8 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
 
   late final Animation<double> _curved = CurvedAnimation(
     parent: _controller,
-    curve: Motion.curve,
-    reverseCurve: Curves.easeInCubic,
+    curve: Motion.enter,
+    reverseCurve: Motion.exitReversed,
   );
 
   @override
@@ -125,7 +140,7 @@ class _AppearState extends State<Appear> with SingleTickerProviderStateMixin {
     if (!widget.animate) return;
 
     final controller = _controller = AnimationController(vsync: this, duration: Motion.slow);
-    final curved = _curved = CurvedAnimation(parent: controller, curve: Motion.curve);
+    final curved = _curved = CurvedAnimation(parent: controller, curve: Motion.enter);
     _offset = Tween(begin: const Offset(0, 0.12), end: Offset.zero).animate(curved);
     if (widget.delay == Duration.zero) {
       controller.forward();
@@ -155,7 +170,10 @@ class _AppearState extends State<Appear> with SingleTickerProviderStateMixin {
   }
 }
 
-/// Card whose background and border change smoothly on hover. Shaped like a Material 3 Card.
+/// Material 3 filled card (medium corner shape).
+///
+/// With [onTap] it is interactive like a Material 3 card: a state layer shows hover (8%), focus and press (10%),
+/// keyboard focus draws a focus ring, and Enter or Space open it like a click.
 class HoverCard extends StatefulWidget {
   const HoverCard({
     super.key,
@@ -179,45 +197,116 @@ class HoverCard extends StatefulWidget {
 }
 
 class _HoverCardState extends State<HoverCard> {
+  static const _radius = 12.0;
+
+  /// Material 3 focus indicator: 3 dp thick, 2 dp outside the card.
+  static const _focusWidth = 3.0;
+  static const _focusGap = 2.0;
+
   bool _hovered = false;
+  bool _focused = false;
+  bool _pressed = false;
+
+  bool get _interactive => widget.onTap != null;
+
+  /// Opacity of the state layer, from the Material 3 interaction state tokens.
+  double get _stateOpacity {
+    if (!_interactive) return 0;
+    if (_pressed || _focused) return 0.10;
+    if (_hovered) return 0.08;
+    return 0;
+  }
+
+  void _setPressed(bool pressed) {
+    if (_pressed != pressed) setState(() => _pressed = pressed);
+  }
+
+  @override
+  void didUpdateWidget(HoverCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_interactive) _pressed = _focused = false;
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final card = Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(color: colors.surfaceContainerLow, borderRadius: BorderRadius.circular(_radius)),
+      child: Stack(
+        children: [
+          if (widget.background case final background?) Positioned.fill(child: background(context, _hovered)),
+          // The state layer sits over the container (and its background image) but under the content.
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedContainer(
+                duration: Motion.fast,
+                curve: Motion.standard,
+                color: colors.onSurface.withValues(alpha: _stateOpacity),
+              ),
+            ),
+          ),
+          AnimatedPadding(
+            duration: Motion.medium,
+            curve: Motion.curve,
+            padding: widget.padding,
+            child: AnimatedSize(
+              duration: Motion.medium,
+              curve: Motion.curve,
+              alignment: Alignment.topCenter,
+              child: widget.child,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // Hover is tracked even when the card isn't interactive, because the background reacts to it.
     return MouseRegion(
-      cursor: widget.onTap == null ? MouseCursor.defer : SystemMouseCursors.click,
+      cursor: _interactive ? SystemMouseCursors.click : MouseCursor.defer,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: Motion.fast,
-          curve: Curves.easeOut,
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: _hovered ? colors.surfaceContainerHigh : colors.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          // The border must be painted over the background image to be visible.
-          foregroundDecoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _hovered ? colors.outlineVariant : colors.outlineVariant.withValues(alpha: 0)),
-          ),
-          child: Stack(
-            children: [
-              if (widget.background case final background?) Positioned.fill(child: background(context, _hovered)),
-              AnimatedPadding(
-                duration: Motion.medium,
-                curve: Motion.curve,
-                padding: widget.padding,
-                child: AnimatedSize(
-                  duration: Motion.medium,
-                  curve: Motion.curve,
-                  alignment: Alignment.topCenter,
-                  child: widget.child,
+      child: FocusableActionDetector(
+        enabled: _interactive,
+        // Only keyboard focus is highlighted, not focus that follows a click.
+        onShowFocusHighlight: (focused) => setState(() => _focused = focused),
+        // Space sends ActivateIntent and Enter sends ButtonActivateIntent.
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(onInvoke: (_) => widget.onTap?.call()),
+          ButtonActivateIntent: CallbackAction<ButtonActivateIntent>(onInvoke: (_) => widget.onTap?.call()),
+        },
+        child: Semantics(
+          button: _interactive,
+          child: GestureDetector(
+            onTap: widget.onTap,
+            onTapDown: _interactive ? (_) => _setPressed(true) : null,
+            onTapUp: _interactive ? (_) => _setPressed(false) : null,
+            onTapCancel: _interactive ? () => _setPressed(false) : null,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                card,
+                Positioned.fill(
+                  left: -(_focusGap + _focusWidth),
+                  top: -(_focusGap + _focusWidth),
+                  right: -(_focusGap + _focusWidth),
+                  bottom: -(_focusGap + _focusWidth),
+                  child: IgnorePointer(
+                    child: AnimatedOpacity(
+                      opacity: _focused ? 1 : 0,
+                      duration: Motion.fast,
+                      curve: Motion.standard,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(_radius + _focusGap + _focusWidth),
+                          border: Border.all(color: colors.secondary, width: _focusWidth),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

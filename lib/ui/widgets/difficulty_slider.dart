@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../core/models/difficulty.dart';
 import '../theme.dart';
 import 'common.dart';
+import 'motion.dart';
 
 /// Difficulty range slider ported from the TUF website's DifficultySlider.
 /// Two difficulty icon knobs pick a range on a track colored with the difficulty gradient.
@@ -39,8 +40,8 @@ class _DifficultySliderState extends State<DifficultySlider> {
   static const _labelWidth = 140.0;
   static const _height = 92.0;
 
-  static const _moveDuration = Duration(milliseconds: 260);
-  static const _moveCurve = Curves.easeOutCubic;
+  static const _moveDuration = Durations.medium1;
+  static const _moveCurve = Motion.curve;
 
   late int _lower = _clamp(widget.lower);
   late int _upper = _clamp(widget.upper);
@@ -204,8 +205,8 @@ class _DifficultySliderState extends State<DifficultySlider> {
         child: IgnorePointer(
           child: AnimatedScale(
             scale: active ? 1.15 : 1,
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
+            duration: Durations.short3,
+            curve: Motion.standard,
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -228,7 +229,7 @@ class _DifficultySliderState extends State<DifficultySlider> {
         width: _labelWidth,
         child: IgnorePointer(
           child: AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 150),
+            duration: Durations.short3,
             style: TextStyle(
               fontSize: 17.6,
               fontWeight: FontWeight.w800,

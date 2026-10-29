@@ -297,7 +297,7 @@ class _PageLayer extends StatelessWidget {
           child: AnimatedOpacity(
             opacity: active ? 1 : 0,
             duration: Motion.fast,
-            curve: Curves.easeOut,
+            curve: Motion.standard,
             // Pause animations (spinners etc.) on hidden pages.
             child: TickerMode(
               enabled: active,

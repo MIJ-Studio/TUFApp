@@ -59,7 +59,7 @@ class PassFlagChip extends StatelessWidget {
           : const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(compact ? 6 : 8),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(label, style: compact ? theme.textTheme.labelSmall : theme.textTheme.labelLarge),
     );
@@ -85,7 +85,7 @@ class ImpactChip extends StatelessWidget {
       message: positive ? l10n.whatThisPassAdds : l10n.doesntCountTowardThe,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
         child: Text(
           text,
           style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.w700),

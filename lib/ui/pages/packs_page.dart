@@ -555,7 +555,7 @@ class _PackCardBar extends StatelessWidget {
           listenable: job ?? download,
           builder: (context, _) => TweenAnimationBuilder<double>(
             tween: Tween(end: download.progress(job?.fraction ?? 0)),
-            duration: const Duration(milliseconds: 200),
+            duration: Durations.short4,
             builder: (context, value, _) => LinearProgressIndicator(
               value: value,
               minHeight: _activeHeight,
@@ -588,7 +588,7 @@ class _IconStrip extends StatefulWidget {
 
 class _IconStripState extends State<_IconStrip> with SingleTickerProviderStateMixin {
   /// How long one icon takes to appear, and the delay before the next one follows.
-  static const _each = Duration(milliseconds: 260);
+  static const _each = Durations.medium1;
   static const _stagger = Duration(milliseconds: 22);
 
   /// Starts finished (1) if the icons were there from the start.
@@ -675,10 +675,7 @@ class _IconStripState extends State<_IconStrip> with SingleTickerProviderStateMi
   static Widget _appearing(double t, Widget Function(double opacity) icon) {
     if (t >= 1) return icon(1);
     if (t <= 0) return const SizedBox.shrink();
-    return Transform.scale(
-      scale: 0.6 + 0.4 * Curves.easeOutBack.transform(t),
-      child: icon(Curves.easeOut.transform(t)),
-    );
+    return Transform.scale(scale: 0.6 + 0.4 * Motion.enter.transform(t), child: icon(Motion.standard.transform(t)));
   }
 }
 
@@ -791,7 +788,7 @@ class _PreviewRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
@@ -817,7 +814,7 @@ class _PackIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(size * 0.18),
+      borderRadius: BorderRadius.circular(size >= 96 ? 16 : 8),
       child: Container(
         width: size,
         height: size,
@@ -1285,7 +1282,7 @@ class _PackDownloadButton extends StatelessWidget {
                 children: [
                   TweenAnimationBuilder<double>(
                     tween: Tween(end: value),
-                    duration: const Duration(milliseconds: 200),
+                    duration: Durations.short4,
                     builder: (context, value, _) => LinearProgressIndicator(value: value),
                   ),
                   const SizedBox(height: 4),
