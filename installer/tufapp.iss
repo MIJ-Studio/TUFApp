@@ -18,9 +18,11 @@ AppId={{2EDD0E8D-D448-4420-825E-A9C0EB68CED6}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
+; Installed apps lists the name alone; the version has its own column.
+UninstallDisplayName={#AppName}
 AppPublisher=MAIJEUN
-AppPublisherURL=https://github.com/MAIJEUN/TUFApp
-AppSupportURL=https://github.com/MAIJEUN/TUFApp/issues
+AppPublisherURL=https://github.com/MIJ-Studio/TUFApp
+AppSupportURL=https://github.com/MIJ-Studio/TUFApp/issues
 DefaultDirName={autopf}\{#AppName}
 DisableProgramGroupPage=yes
 ; Installs for the current user without administrator rights (in %LocalAppData%\Programs);
