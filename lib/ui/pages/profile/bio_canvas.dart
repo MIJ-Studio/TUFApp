@@ -11,6 +11,7 @@ import '../../../core/models/profile.dart';
 import '../../widgets/embedded_video.dart';
 import '../../widgets/hover_tip.dart';
 import '../../widgets/motion.dart';
+import '../../widgets/smooth_scroll.dart';
 import '../../widgets/level_card.dart';
 import 'profile_modules.dart';
 
@@ -533,6 +534,16 @@ class _FeaturedBlockState extends State<_FeaturedBlock> {
 
   Future<List<Object>>? _rows;
 
+  /// Its own controller: on desktop a scrollbar without one finds no scroll position (Flutter only
+  /// shares the primary one on mobile), which fails every frame.
+  final _scroll = SmoothScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -567,18 +578,22 @@ class _FeaturedBlockState extends State<_FeaturedBlock> {
           );
         }
         // The app's own level cards and pass rows, as in every other list.
-        return Scrollbar(
-          thumbVisibility: true,
-          child: ListView.separated(
-            // Room for the cards' focus rings.
-            padding: const EdgeInsets.all(6),
-            itemCount: items.length,
-            separatorBuilder: (context, _) => const SizedBox(height: 8),
-            itemBuilder: (context, index) => switch (items[index]) {
-              final Level level => _fit(LevelCard(level: level, compact: false, embedded: true)),
-              final PlayerPassEntry entry => _fit(ProfileScoreCard(entry: entry, featured: true, embedded: true)),
-              _ => const SizedBox.shrink(),
-            },
+        return SmoothScrollbar(
+          controller: _scroll,
+          builder: (context, behavior) => ScrollConfiguration(
+            behavior: behavior,
+            child: ListView.separated(
+              controller: _scroll,
+              // Room for the cards' focus rings.
+              padding: const EdgeInsets.all(6),
+              itemCount: items.length,
+              separatorBuilder: (context, _) => const SizedBox(height: 8),
+              itemBuilder: (context, index) => switch (items[index]) {
+                final Level level => _fit(LevelCard(level: level, compact: false, embedded: true)),
+                final PlayerPassEntry entry => _fit(ProfileScoreCard(entry: entry, featured: true, embedded: true)),
+                _ => const SizedBox.shrink(),
+              },
+            ),
           ),
         );
       },

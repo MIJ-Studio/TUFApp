@@ -130,16 +130,21 @@ void main() {
       return requested;
     }
 
-    testWidgets('1000 폭 무대에 블록을 겹쳐 그리고, 추천 레벨을 번호로 받아 온다', (tester) async {
-      final requested = await pump(tester, 1200);
-      expect(tester.takeException(), isNull);
-      expect(tester.getSize(find.byType(BioCanvas)).height, 1200, reason: 'never scaled up');
-      expect(find.text('Sample text'), findsNWidgets(20));
+    // Also on Windows: desktop scrollbars need their own scroll controller, unlike the default mobile platform.
+    testWidgets(
+      '1000 폭 무대에 블록을 겹쳐 그리고, 추천 레벨을 번호로 받아 온다',
+      variant: TargetPlatformVariant.only(TargetPlatform.windows),
+      (tester) async {
+        final requested = await pump(tester, 1200);
+        expect(tester.takeException(), isNull);
+        expect(tester.getSize(find.byType(BioCanvas)).height, 1200, reason: 'never scaled up');
+        expect(find.text('Sample text'), findsNWidgets(20));
 
-      final query = requested.singleWhere((uri) => uri.path == '/v2/database/levels').queryParameters;
-      expect(query['query'], 'id:8486 | id:7623 | id:11425 | id:6410 | id:7653');
-      expect(find.text('Imaginary Legacy'), findsOneWidget);
-    });
+        final query = requested.singleWhere((uri) => uri.path == '/v2/database/levels').queryParameters;
+        expect(query['query'], 'id:8486 | id:7623 | id:11425 | id:6410 | id:7653');
+        expect(find.text('Imaginary Legacy'), findsOneWidget);
+      },
+    );
 
     testWidgets('좁으면 무대 전체를 줄인다', (tester) async {
       await pump(tester, 500);
