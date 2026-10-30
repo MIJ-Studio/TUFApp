@@ -5,6 +5,7 @@ import '../../core/l10n.dart';
 import '../../core/models/pass.dart';
 import 'common.dart';
 import 'hover_tip.dart';
+import 'labels.dart';
 import 'level_card.dart';
 import 'motion.dart';
 import 'pass_badges.dart';
@@ -33,6 +34,7 @@ class PassRow extends StatelessWidget {
     this.showDate = true,
     this.videoBackdrop = true,
     this.rank,
+    this.embedded = false,
   });
 
   final LevelPass pass;
@@ -69,6 +71,10 @@ class PassRow extends StatelessWidget {
   /// Leaderboard rank. If set, a dim card-height "#1" sits behind the left of the row, like on the website.
   final int? rank;
   final VoidCallback onTap;
+
+  /// For narrow places inside other content (a profile's bio): the same row without the speed column and the
+  /// video and date column.
+  final bool embedded;
 
   /// Same line heights as a level card (top 22, middle 26, gap 4, bottom 20 = 72).
   static const topLine = 22.0;
@@ -168,10 +174,7 @@ class PassRow extends StatelessWidget {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   spacing: 6,
-                                  children: [
-                                    for (final flag in flags)
-                                      PassFlagChip(label: flag.label, tip: flag.tip, compact: true),
-                                  ],
+                                  children: [for (final flag in flags) PassFlagChip(label: flag.label, tip: flag.tip)],
                                 ),
                               ),
                             ),
@@ -205,46 +208,48 @@ class PassRow extends StatelessWidget {
                 value: _Accuracy(pass: pass),
               ),
             ),
-            SizedBox(
-              width: speedWidth,
-              child: _Labeled(
-                label: l10n.speedMultiplier,
-                value: Text('${formatSpeed(pass.speed)}x', style: theme.textTheme.titleMedium),
+            if (!embedded)
+              SizedBox(
+                width: speedWidth,
+                child: _Labeled(
+                  label: l10n.speedMultiplier,
+                  value: Text('${formatSpeed(pass.speed)}x', style: theme.textTheme.titleMedium),
+                ),
               ),
-            ),
             // Where a level card has its download column: the video button vertically
             // centered like on level cards, the date in the bottom right corner.
             // Both have fixed places, so nothing else moves when there is no video or the date is short.
-            SizedBox(
-              width: tailWidth,
-              height: LevelCard.contentHeight,
-              child: Stack(
-                children: [
-                  if (video != null)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: HoverTip(
-                        message: l10n.watchVideo,
-                        child: IconButton(
-                          onPressed: () => app.openLink(video),
-                          icon: const Icon(Icons.smart_display_outlined),
+            if (!embedded)
+              SizedBox(
+                width: tailWidth,
+                height: LevelCard.contentHeight,
+                child: Stack(
+                  children: [
+                    if (video != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: HoverTip(
+                          message: l10n.watchVideo,
+                          child: IconButton(
+                            onPressed: () => app.openLink(video),
+                            icon: const Icon(Icons.smart_display_outlined),
+                          ),
                         ),
                       ),
-                    ),
-                  if (showDate && pass.clearedAt != null)
-                    Positioned(
-                      right: 0,
-                      bottom: 0,
-                      child: Text(
-                        formatDate(pass.clearedAt),
-                        maxLines: 1,
-                        softWrap: false,
-                        style: theme.textTheme.labelSmall?.copyWith(color: muted),
+                    if (showDate && pass.clearedAt != null)
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Text(
+                          formatDate(pass.clearedAt),
+                          maxLines: 1,
+                          softWrap: false,
+                          style: theme.textTheme.labelSmall?.copyWith(color: muted),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -333,12 +338,7 @@ class JudgementStrip extends StatelessWidget {
     final theme = Theme.of(context);
     final xPerfect = pass.showsXPerfect;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.85),
-        borderRadius: BorderRadius.circular(8),
-      ),
+    return InfoChip(
       child: Row(
         mainAxisSize: MainAxisSize.min,
         spacing: 8,

@@ -8,6 +8,7 @@ import '../../core/l10n.dart';
 import '../../core/models/pack.dart';
 import '../widgets/common.dart';
 import '../widgets/hover_tip.dart';
+import '../widgets/labels.dart';
 import '../widgets/level_card.dart';
 import '../widgets/motion.dart';
 import '../widgets/raster_snapshot.dart';
@@ -728,20 +729,8 @@ class _Likes extends StatelessWidget {
   final int count;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-    return HoverTip(
-      message: l10n.likeCount(count),
-      child: Column(
-        children: [
-          Icon(Icons.favorite_border, size: 22, color: muted),
-          const SizedBox(height: 2),
-          Text(formatNumber(count), style: theme.textTheme.labelMedium?.copyWith(color: muted)),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      InfoChip(icon: Icons.favorite_border, label: formatNumber(count), tip: l10n.likeCount(count));
 }
 
 class _OwnerLine extends StatelessWidget {
@@ -1163,15 +1152,12 @@ class _DetailHeader extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Icon(Icons.library_music_outlined, size: 16, color: muted),
-                      const SizedBox(width: 4),
-                      Text(l10n.levelCount(pack.levelCount), style: theme.textTheme.bodyMedium?.copyWith(color: muted)),
-                      const SizedBox(width: 16),
-                      Icon(Icons.favorite_border, size: 16, color: muted),
-                      const SizedBox(width: 4),
-                      Text(
-                        formatNumber(pack.favoritesCount),
-                        style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+                      InfoChip(icon: Icons.library_music_outlined, label: l10n.levelCount(pack.levelCount)),
+                      const SizedBox(width: 6),
+                      InfoChip(
+                        icon: Icons.favorite_border,
+                        label: formatNumber(pack.favoritesCount),
+                        tip: l10n.likeCount(pack.favoritesCount),
                       ),
                     ],
                   ),

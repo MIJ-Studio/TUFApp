@@ -8,12 +8,11 @@ import '../../../core/image_cache_store.dart';
 import '../../../core/l10n.dart';
 import '../../../core/models/level.dart';
 import '../../../core/models/profile.dart';
-import '../../widgets/common.dart';
 import '../../widgets/embedded_video.dart';
 import '../../widgets/hover_tip.dart';
 import '../../widgets/motion.dart';
-import '../level_viewer_page.dart';
-import '../pass_viewer_page.dart';
+import '../../widgets/level_card.dart';
+import 'profile_modules.dart';
 
 /// A supporter's bio canvas, drawn like the website's BioCanvasRenderer.
 ///
@@ -567,160 +566,36 @@ class _FeaturedBlockState extends State<_FeaturedBlock> {
             style: const TextStyle(fontSize: 14, color: _BioColors.body),
           );
         }
+        // The app's own level cards and pass rows, as in every other list.
         return Scrollbar(
           thumbVisibility: true,
-          child: ListView(
-            padding: const EdgeInsets.all(2),
-            children: [
-              for (final item in items)
-                switch (item) {
-                  final Level level => _FeaturedLevel(level: level),
-                  final PlayerPassEntry entry => _FeaturedPass(entry: entry),
-                  _ => const SizedBox.shrink(),
-                },
-            ],
+          child: ListView.separated(
+            // Room for the cards' focus rings.
+            padding: const EdgeInsets.all(6),
+            itemCount: items.length,
+            separatorBuilder: (context, _) => const SizedBox(height: 8),
+            itemBuilder: (context, index) => switch (items[index]) {
+              final Level level => _fit(LevelCard(level: level, compact: false, embedded: true)),
+              final PlayerPassEntry entry => _fit(ProfileScoreCard(entry: entry, featured: true, embedded: true)),
+              _ => const SizedBox.shrink(),
+            },
           ),
         );
       },
     );
   }
-}
 
-/// One featured level: difficulty icon, "#id - artist", song, length and tiles, and the creator.
-class _FeaturedLevel extends StatelessWidget {
-  const _FeaturedLevel({required this.level});
+  /// Narrowest a card is laid out; narrower blocks scale it down so it keeps the layout it has everywhere else
+  /// instead of squeezing its columns.
+  static const _minCardWidth = 560.0;
 
-  final Level level;
-
-  @override
-  Widget build(BuildContext context) {
-    final app = AppScope.of(context);
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-    final difficulty = app.levels.catalog?.byId(level.diffId) ?? level.difficulty;
-    final length = level.length;
-
-    return _FeaturedCard(
-      onTap: () => LevelViewerPage.open(context, level),
-      child: Row(
-        spacing: 12,
-        children: [
-          NetworkIcon(difficulty?.icon, size: 48),
-          Expanded(
-            flex: 14,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _line(
-                  ['#${level.id}', if (level.artist.isNotEmpty) level.artist].join(' - '),
-                  theme.textTheme.labelSmall,
-                  muted,
-                ),
-                _line(level.song, theme.textTheme.titleSmall, null),
-                _line(
-                  [
-                    if (length != null) formatDuration(length),
-                    if (level.tilecount case final tiles? when tiles > 0) '${formatNumber(tiles)} ${l10n.tilesUnit}',
-                  ].join('  ·  '),
-                  theme.textTheme.labelSmall,
-                  muted,
-                ),
-              ],
-            ),
+  static Widget _fit(Widget card) => LayoutBuilder(
+    builder: (context, constraints) => constraints.maxWidth >= _minCardWidth
+        ? card
+        : FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.topLeft,
+            child: SizedBox(width: _minCardWidth, child: card),
           ),
-          Expanded(
-            flex: 10,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _line(l10n.creator, theme.textTheme.labelSmall, muted),
-                _line(level.creatorDisplay ?? '-', theme.textTheme.bodySmall, null),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One featured pass: difficulty icon, song and player, score and accuracy.
-class _FeaturedPass extends StatelessWidget {
-  const _FeaturedPass({required this.entry});
-
-  final PlayerPassEntry entry;
-
-  @override
-  Widget build(BuildContext context) {
-    final app = AppScope.of(context);
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-    final level = entry.level;
-    final pass = entry.pass;
-    final difficulty = app.levels.catalog?.byId(level.diffId) ?? level.difficulty;
-
-    return _FeaturedCard(
-      onTap: () => PassViewerPage.open(context, level: level, pass: pass),
-      child: Row(
-        spacing: 12,
-        children: [
-          NetworkIcon(difficulty?.icon, size: 48),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _line(
-                  ['#${level.id}', if (level.artist.isNotEmpty) level.artist].join(' - '),
-                  theme.textTheme.labelSmall,
-                  muted,
-                ),
-                _line(level.song, theme.textTheme.titleSmall, null),
-                _line(pass.playerName, theme.textTheme.labelSmall, muted),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              _line(formatScore(pass.score), theme.textTheme.titleSmall, null),
-              _line(formatAccuracy(pass.accuracy), theme.textTheme.labelSmall, muted),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// The website's featured card: a translucent dark row with a faint border.
-class _FeaturedCard extends StatelessWidget {
-  const _FeaturedCard({required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 4),
-    child: Material(
-      color: const Color(0x33090909),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: const BorderSide(color: _BioColors.border),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(padding: const EdgeInsets.all(12), child: child),
-      ),
-    ),
   );
 }
-
-Widget _line(String text, TextStyle? style, Color? color) => Text(
-  text,
-  maxLines: 1,
-  overflow: TextOverflow.ellipsis,
-  textScaler: TextScaler.noScaling,
-  style: color == null ? style : style?.copyWith(color: color),
-);

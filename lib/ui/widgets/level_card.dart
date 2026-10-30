@@ -14,6 +14,7 @@ import '../pages/level_viewer_page.dart';
 import '../theme.dart';
 import 'common.dart';
 import 'hover_tip.dart';
+import 'labels.dart';
 import 'motion.dart';
 import 'raster_snapshot.dart';
 import 'slide_overflow.dart';
@@ -21,7 +22,7 @@ import 'video_backdrop.dart';
 
 /// One card in the levels list.
 class LevelCard extends StatelessWidget {
-  const LevelCard({super.key, required this.level, required this.compact, this.openable = true});
+  const LevelCard({super.key, required this.level, required this.compact, this.openable = true, this.embedded = false});
 
   final Level level;
   final bool compact;
@@ -29,12 +30,16 @@ class LevelCard extends StatelessWidget {
   /// Tapping opens the level details. Off for the card inside the details page.
   final bool openable;
 
+  /// For narrow places inside other content (a profile's bio): the same card without the clears and likes,
+  /// links and download columns.
+  final bool embedded;
+
   /// Gap between columns.
   static const _columnGap = 16.0;
   static const _creatorWidth = 176.0;
   static const _statsWidth = 104.0;
 
-  bool get _hasStats => level.clears > 0 || level.likes > 0;
+  bool get _hasStats => !embedded && (level.clears > 0 || level.likes > 0);
 
   /// Inner card height. Every card keeps the same size regardless of content.
   static const contentHeight = 72.0;
@@ -60,13 +65,13 @@ class LevelCard extends StatelessWidget {
             child: _SongInfo(level: level, compact: compact),
           ),
           SizedBox(
-            width: _creatorWidth + _columnGap + _statsWidth,
+            width: embedded ? _creatorWidth : _creatorWidth + _columnGap + _statsWidth,
             child: Stack(
               children: [
                 // If the clears and likes columns are empty, the creator takes their space.
                 // It only scrolls sideways if it still overflows.
                 SizedBox(
-                  width: _hasStats ? _creatorWidth : _creatorWidth + _columnGap + _statsWidth,
+                  width: _hasStats || embedded ? _creatorWidth : _creatorWidth + _columnGap + _statsWidth,
                   height: double.infinity,
                   child: Align(
                     alignment: Alignment.centerLeft,
@@ -84,33 +89,35 @@ class LevelCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(width: 88, child: _Links(level: level)),
-          SizedBox(
-            width: 132,
-            // Like the website, the download count goes under the download
-            // button (left out in compact view for lack of space).
-            // The button always stays vertically centered and the count is attached below it,
-            // so the button doesn't move whether or not there is a count.
-            child: compact || !(level.downloadCount > 0 || LevelDownloader.isTufCdnLink(level.dlLink))
-                ? Center(child: _InstallButton(level: level))
-                : SizedBox(
-                    height: contentHeight,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        _InstallButton(level: level),
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          // 4 below the button (40). It may reach slightly into the card's bottom padding.
-                          top: contentHeight / 2 + 20 + 4,
-                          child: Center(child: _DownloadInfo(level: level)),
-                        ),
-                      ],
+          if (!embedded) ...[
+            SizedBox(width: 88, child: _Links(level: level)),
+            SizedBox(
+              width: 132,
+              // Like the website, the download count goes under the download
+              // button (left out in compact view for lack of space).
+              // The button always stays vertically centered and the count is attached below it,
+              // so the button doesn't move whether or not there is a count.
+              child: compact || !(level.downloadCount > 0 || LevelDownloader.isTufCdnLink(level.dlLink))
+                  ? Center(child: _InstallButton(level: level))
+                  : SizedBox(
+                      height: contentHeight,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          _InstallButton(level: level),
+                          Positioned(
+                            left: 0,
+                            right: 0,
+                            // 4 below the button (40). It may reach slightly into the card's bottom padding.
+                            top: contentHeight / 2 + 20 + 4,
+                            child: Center(child: _DownloadInfo(level: level)),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-          ),
+            ),
+          ],
         ],
       ),
     ),
@@ -403,12 +410,15 @@ class _SongInfo extends StatelessWidget {
         const SizedBox(height: tagGap),
         SizedBox(
           height: tagLine,
-          child: Row(
-            children: [
-              Expanded(child: level.tags.isEmpty ? const SizedBox.shrink() : _Tags(tags: level.tags)),
-              const SizedBox(width: 16),
-              _Meta(level: level),
-            ],
+          // In narrow cards (inside a bio) the values shrink to the line instead of overflowing it.
+          child: LayoutBuilder(
+            builder: (context, constraints) => Row(
+              children: [
+                Expanded(child: level.tags.isEmpty ? const SizedBox.shrink() : _Tags(tags: level.tags)),
+                const SizedBox(width: 16),
+                _Meta(level: level, maxWidth: min(_Meta.defaultMaxWidth, constraints.maxWidth - 16)),
+              ],
+            ),
           ),
         ),
       ],
@@ -419,21 +429,23 @@ class _SongInfo extends StatelessWidget {
 /// Time, tile count and BPM, right-aligned on the tag line with equal gaps.
 /// Widths follow the values, so long ones like "486.06 BPM" aren't cut off.
 class _Meta extends StatelessWidget {
-  const _Meta({required this.level});
+  const _Meta({required this.level, this.maxWidth = defaultMaxWidth});
 
-  static const _gap = 16.0;
+  /// Same gap as between flag chips.
+  static const _gap = 6.0;
 
   /// Maximum width; values are only shrunk when very long ones would overlap.
-  static const _maxWidth = 260.0;
+  static const defaultMaxWidth = 260.0;
 
   final Level level;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
     final length = level.length;
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: _maxWidth),
+      constraints: BoxConstraints(maxWidth: max(0, maxWidth)),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         alignment: Alignment.centerRight,
@@ -692,7 +704,7 @@ class _ConfidenceRingPainter extends CustomPainter {
   bool shouldRepaint(_ConfidenceRingPainter old) => old.score != score || old.image != image || old.circle != circle;
 }
 
-/// One time/tiles/BPM value. A dim '-' holds the place when missing.
+/// One time/tiles/BPM value in a chip, like the website. A '-' holds the place when missing.
 class _MetaValue extends StatelessWidget {
   const _MetaValue({required this.icon, required this.text, required this.tooltip});
 
@@ -701,25 +713,7 @@ class _MetaValue extends StatelessWidget {
   final String tooltip;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final muted = theme.colorScheme.onSurfaceVariant;
-
-    return Opacity(
-      opacity: text == null ? 0.35 : 1,
-      child: HoverTip(
-        message: tooltip,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: muted),
-            const SizedBox(width: 4),
-            Text(text ?? '-', maxLines: 1, softWrap: false, style: theme.textTheme.labelMedium?.copyWith(color: muted)),
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => InfoChip(icon: icon, label: text ?? '-', tip: tooltip);
 }
 
 class _CreatorInfo extends StatelessWidget {
@@ -756,43 +750,30 @@ class _Stats extends StatelessWidget {
   final Level level;
 
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final iconColor = theme.colorScheme.onSurfaceVariant;
-
-    return Row(
-      spacing: 12,
-      children: [
-        // Without clears, hide but keep the space (keeps columns aligned).
-        Opacity(
-          opacity: level.clears > 0 ? 1 : 0,
-          child: HoverTip(
-            message: l10n.clearedByPlayerTotal(level.uniqueClears, level.clears),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.flag_outlined, size: 16, color: iconColor),
-                const SizedBox(width: 4),
-                Text(formatNumber(level.uniqueClears), style: theme.textTheme.labelLarge),
-              ],
+  Widget build(BuildContext context) => Align(
+    alignment: Alignment.centerLeft,
+    // Big counts shrink to the column instead of overflowing it.
+    child: FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          // Without clears, hide but keep the space (keeps columns aligned).
+          Opacity(
+            opacity: level.clears > 0 ? 1 : 0,
+            child: InfoChip(
+              icon: Icons.flag_outlined,
+              label: formatNumber(level.uniqueClears),
+              tip: l10n.clearedByPlayerTotal(level.uniqueClears, level.clears),
             ),
           ),
-        ),
-        if (level.likes > 0)
-          HoverTip(
-            message: l10n.likes,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.favorite_border, size: 16, color: iconColor),
-                const SizedBox(width: 4),
-                Text(formatNumber(level.likes), style: theme.textTheme.labelLarge),
-              ],
-            ),
-          ),
-      ],
-    );
-  }
+          if (level.likes > 0) InfoChip(icon: Icons.favorite_border, label: formatNumber(level.likes), tip: l10n.likes),
+        ],
+      ),
+    ),
+  );
 }
 
 class _Links extends StatelessWidget {

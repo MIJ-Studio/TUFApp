@@ -6,6 +6,7 @@ import '../../core/models/browse.dart';
 import '../../core/profile_stats.dart';
 import '../widgets/common.dart';
 import '../widgets/hover_tip.dart';
+import '../widgets/labels.dart';
 import '../widgets/motion.dart';
 import '../widgets/slide_overflow.dart';
 import 'browse_page.dart';
@@ -213,13 +214,6 @@ class _Stat extends StatelessWidget {
     );
 
     if (!emphasized) return Padding(padding: const EdgeInsets.only(left: 12), child: content);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: content,
-    );
+    return ValueBox(child: content);
   }
 }

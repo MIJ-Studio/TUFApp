@@ -9,6 +9,7 @@ import '../widgets/common.dart';
 import '../widgets/embedded_video.dart';
 import '../widgets/side_by_side.dart';
 import '../widgets/hover_tip.dart';
+import '../widgets/labels.dart';
 import '../widgets/level_card.dart';
 import '../widgets/motion.dart';
 import 'profile/profile_navigation.dart';
@@ -286,12 +287,7 @@ class _PlayerCard extends StatelessWidget {
                     : HoverTip(
                         key: const ValueKey('rank'),
                         message: l10n.overallRank,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.secondaryContainer,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        child: ValueBox(
                           child: Text(
                             '#${formatNumber(detail!.rank)}',
                             style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer),
@@ -387,12 +383,7 @@ class _StatRow extends StatelessWidget {
         children: [
           Text(label, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
+          ValueBox(
             child: Text(
               value,
               style: theme.textTheme.labelLarge?.copyWith(

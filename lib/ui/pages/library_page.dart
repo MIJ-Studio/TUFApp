@@ -7,6 +7,7 @@ import '../../core/l10n.dart';
 import '../../core/library_organizer.dart';
 import '../widgets/common.dart';
 import '../widgets/hover_tip.dart';
+import '../widgets/labels.dart';
 import '../widgets/motion.dart';
 import '../widgets/slide_overflow.dart';
 import '../widgets/smooth_scroll.dart';
@@ -623,10 +624,9 @@ class _LevelContent extends StatelessWidget {
                         ? Appear(
                             child: Padding(
                               padding: const EdgeInsets.only(left: 8),
-                              child: Chip(
-                                label: Text(l10n.updateAvailable),
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              child: InfoChip(
+                                label: l10n.updateAvailable,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
                           )

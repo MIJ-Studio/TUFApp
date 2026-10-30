@@ -523,7 +523,14 @@ class _RankHistoryModuleState extends State<RankHistoryModule> {
 /// One of a player's passes ([PassRow] layout, the size of a level card).
 /// Like the website's score card, shows the song and, under the score, what it adds to the ranked score.
 class ProfileScoreCard extends StatelessWidget {
-  const ProfileScoreCard({super.key, required this.entry, this.impact, this.potentialImpact, this.featured = false});
+  const ProfileScoreCard({
+    super.key,
+    required this.entry,
+    this.impact,
+    this.potentialImpact,
+    this.featured = false,
+    this.embedded = false,
+  });
 
   final PlayerPassEntry entry;
 
@@ -535,6 +542,9 @@ class ProfileScoreCard extends StatelessWidget {
 
   /// Row inside a favorites module: the top line shows who made the pass.
   final bool featured;
+
+  /// Narrow row inside a bio ([PassRow.embedded]).
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -563,6 +573,7 @@ class ProfileScoreCard extends StatelessWidget {
       impact: impact,
       potentialImpact: impact == null ? potentialImpact : null,
       showDate: !featured,
+      embedded: embedded,
     );
   }
 }

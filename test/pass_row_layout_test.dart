@@ -107,9 +107,9 @@ void main() {
     expect(card.right - date.right, closeTo(12, 0.5));
 
     // The flag chip (<3.4.0) sits at the right end of the three-line column,
-    // right before the score column (16 gap + 6 chip padding).
+    // right before the score column (16 gap + 8 chip padding).
     final flag = tester.getRect(find.text('<3.4.0'));
     final score = tester.getRect(find.text('점수'));
-    expect(score.left - flag.right, closeTo(16 + 6, 0.5));
+    expect(score.left - flag.right, closeTo(16 + 8, 0.5));
   });
 }

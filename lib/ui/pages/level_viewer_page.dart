@@ -12,6 +12,7 @@ import '../widgets/common.dart';
 import '../widgets/embedded_video.dart';
 import '../widgets/side_by_side.dart';
 import '../widgets/hover_tip.dart';
+import '../widgets/labels.dart';
 import '../widgets/level_card.dart';
 import '../widgets/level_info_dialog.dart';
 import 'pass_viewer_page.dart';
@@ -345,8 +346,9 @@ class _RecordRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final who = this.who;
-    final value = this.value;
+    // Empty text counts as missing (formatDate gives '' without a date), so no empty box is drawn.
+    final who = this.who?.isEmpty ?? true ? null : this.who;
+    final value = this.value?.isEmpty ?? true ? null : this.value;
     final style = theme.textTheme.labelLarge?.copyWith(color: theme.colorScheme.onSecondaryContainer);
 
     return Padding(
@@ -362,13 +364,8 @@ class _RecordRow extends StatelessWidget {
                 alignment: Alignment.centerRight,
                 child: who == null && value == null
                     ? const SizedBox(key: ValueKey('empty'), height: 32)
-                    : Container(
+                    : ValueBox(
                         key: ValueKey('$who|$value'),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.secondaryContainer,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
                         constraints: const BoxConstraints(maxWidth: 260),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,

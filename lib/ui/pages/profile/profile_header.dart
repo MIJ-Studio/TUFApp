@@ -8,6 +8,7 @@ import '../../../core/models/pass.dart';
 import '../../../core/profile_stats.dart';
 import '../../widgets/common.dart';
 import '../../widgets/hover_tip.dart';
+import '../../widgets/labels.dart';
 import '../../widgets/motion.dart';
 import '../../widgets/slide_overflow.dart';
 import '../../widgets/smooth_scroll.dart';
@@ -256,9 +257,7 @@ class _RankChip extends StatelessWidget {
         : l10n.highestRank(best.rank, formatDate(best.date));
     return HoverTip(
       message: tip,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(color: theme.colorScheme.secondaryContainer, borderRadius: BorderRadius.circular(8)),
+      child: ValueBox(
         child: Text(
           rank > 0 ? '#${formatNumber(rank)}' : l10n.unranked,
           style: theme.textTheme.titleLarge?.copyWith(
@@ -620,7 +619,13 @@ class CurationPanel extends StatelessWidget {
               runSpacing: 8,
               children: [
                 for (final type in entry.value)
-                  Chip(avatar: NetworkIcon(type.icon, size: 20), label: Text('${type.name}  ${counts[type.id]}')),
+                  InfoChip(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 4,
+                      children: [NetworkIcon(type.icon, size: 16), Text('${type.name}  ${counts[type.id]}')],
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
@@ -641,25 +646,13 @@ class VerificationBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final text = conditions;
-    return HoverTip(
-      message: text == null || text.isEmpty ? l10n.levelUploadPermission : l10n.uploadConditions(text),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 4,
-          children: [
-            Text(
-              label,
-              style: theme.textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.w700),
-            ),
-            if (text != null && text.isNotEmpty) Icon(Icons.info_outline, size: 14, color: color),
-          ],
-        ),
-      ),
+    final hasConditions = text != null && text.isNotEmpty;
+    return InfoChip(
+      label: label,
+      color: color,
+      tip: hasConditions ? l10n.uploadConditions(text) : l10n.levelUploadPermission,
+      trailingIcon: hasConditions ? Icons.info_outline : null,
     );
   }
 }
@@ -717,17 +710,7 @@ class ProfileGroupRow extends StatelessWidget {
           ),
           ?trailing,
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.secondaryContainer,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              '$count',
-              style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.onSecondaryContainer),
-            ),
-          ),
+          InfoChip(label: '$count'),
         ],
       ),
     );
