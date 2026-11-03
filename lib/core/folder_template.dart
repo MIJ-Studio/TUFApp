@@ -134,7 +134,7 @@ class LevelFolderTemplate {
       values[longest.key] = _cut(longest.value, keep);
       name = build();
     }
-    return name.isEmpty ? '' : LevelManager.safeFolderName(name.replaceAll('|', _bar));
+    return name.isEmpty ? '' : LevelManager.safeFolderName(name.replaceAll(_barWithSpaces, _bar));
   }
 
   static const _minShortened = 8;
@@ -142,6 +142,9 @@ class LevelFolderTemplate {
   /// Windows doesn't allow '|' in folder names, and the creators are joined with it ("charter | VFX"),
   /// so it becomes the full-width bar that looks the same instead of '_'.
   static const _bar = '｜';
+
+  /// The full-width bar already has room on both sides, so the spaces around it go ("A | B" → "A｜B").
+  static final _barWithSpaces = RegExp(r' *\| *');
 
   /// The first [length] UTF-16 units, without splitting an emoji or other surrogate pair.
   static String _cut(String text, int length) {

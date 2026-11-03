@@ -28,21 +28,21 @@ void main() {
 
     test('태그를 값으로 바꾸고, 대소문자는 가리지 않는다', () {
       expect(format('{Artist} - {song} [{ID}]'), 'Frums - multi_arm [1]');
-      expect(format('{charter} | {vfxer}'), 'Zagon & Nephrolepis ｜ Asansis', reason: '| 는 폴더 이름에 못 써서 전각 ｜');
-      expect(format('{creator}'), 'Zagon & 1 more ｜ Asansis', reason: '사이트에 보이는 제작자');
+      expect(format('{charter} | {vfxer}'), 'Zagon & Nephrolepis｜Asansis', reason: '| 는 폴더 이름에 못 써서 전각 ｜, 양옆 띄어쓰기 없이');
+      expect(format('{creator}'), 'Zagon & 1 more｜Asansis', reason: '사이트에 보이는 제작자');
       expect(format('{difficulty} {bpm} {tiles}'), 'GQ0 182.5 1234');
     });
 
     test('{team}은 팀이 없으면 제작자를 쓴다', () {
-      expect(format('{team}'), 'Zagon & 1 more ｜ Asansis', reason: '팀이 없는 레벨');
+      expect(format('{team}'), 'Zagon & 1 more｜Asansis', reason: '팀이 없는 레벨');
       const teamLevel = Level(id: 9, song: 'Song', artist: 'Artist', team: 'Team A', creator: 'someone');
       expect(format('{team} - {song}', teamLevel), 'Team A - Song');
-      expect(format('{team} - {song}', const Level(id: 9, song: 'Song', artist: '', creator: 'A | B')), 'A ｜ B - Song');
+      expect(format('{team} - {song}', const Level(id: 9, song: 'Song', artist: '', creator: 'A | B')), 'A｜B - Song');
     });
 
     test('| 는 _ 가 아니라 생김새가 같은 전각 ｜ 로, 다른 못 쓰는 글자는 _ 로', () {
       expect(format('{song}', const Level(id: 1, song: 'X:||', artist: '')), 'X_｜｜');
-      expect(format('{song} | {id}'), 'multi_arm ｜ 1', reason: '형식에 직접 쓴 | 도');
+      expect(format('{song} | {id}'), 'multi_arm｜1', reason: '형식에 직접 쓴 | 도');
     });
 
     test('/ 는 하위 폴더를 만들고, 값 안의 / 는 폴더를 나누지 않는다', () {
