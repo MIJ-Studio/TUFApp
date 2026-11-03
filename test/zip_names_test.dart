@@ -11,7 +11,7 @@ import 'package:tufapp/core/zip_names.dart';
 /// Old archivers store file names in the machine's code page without the UTF-8 flag.
 /// Extracting them as is garbles the names and the level can't find its music.
 void main() {
-  // CP949 bytes of '자산 49oz.png' (a name that actually broke).
+  // CP949 bytes of '9자산 49oz.png' (a name that actually broke).
   final korean = <int>[...'9'.codeUnits, 0xC0, 0xDA, 0xBB, 0xEA, ...' 49oz.png'.codeUnits];
   // Shift-JIS bytes of '曲.mp3'.
   final japanese = <int>[0x8B, 0xC8, ...'.mp3'.codeUnits];
@@ -33,10 +33,12 @@ void main() {
       Directory(folder).listSync(recursive: true).map((e) => p.basename(e.path)).toList()..sort();
 
   test('한글 이름을 옛 방식으로 적은 zip', () {
+    // The level file names the music, so the Korean code page is picked on any machine
+    // (CI runs on English Windows, whose own code page would garble the name).
     final out = extractTo(
       buildZip([
         ZipEntry(korean, [1, 2, 3]),
-        ZipEntry('level.adofai'.codeUnits, utf8.encode('{"settings":{"songFilename":"자산 49oz.png"}}')),
+        ZipEntry('level.adofai'.codeUnits, utf8.encode('{"settings":{"songFilename":"9자산 49oz.png"}}')),
       ]),
       folder: 'korean',
     );
