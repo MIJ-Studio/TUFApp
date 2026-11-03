@@ -80,14 +80,18 @@ void main() {
     expect(find.text('Leaderboard'), findsWidgets);
     expect(app.page, AppPage.library, reason: '보던 페이지는 그대로');
 
-    // Pick from the menu.
-    await tester.tap(find.byTooltip('Language'));
+    // Pick from the menu on the settings page.
+    await tester.tap(find.byTooltip('Settings'));
     await tester.pumpAndSettle();
-    expect(find.text('English'), findsOneWidget);
-    await tester.tap(find.widgetWithText(CheckedPopupMenuItem<AppLanguage?>, '한국어'));
+    await tester.tap(find.byType(DropdownMenu<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('한국어').last);
     await tester.pumpAndSettle();
     expect(appLanguage, AppLanguage.ko);
     expect(app.languageChoice, AppLanguage.ko);
+    expect(find.text('설정'), findsOneWidget, reason: '설정 화면도 바로 바뀐다');
+    await tester.tap(find.byTooltip('뒤로'));
+    await tester.pumpAndSettle();
     expect(find.text('레벨 관리'), findsWidgets);
   });
 }

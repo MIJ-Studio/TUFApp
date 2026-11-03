@@ -1944,4 +1944,136 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get highestDifficulty => '최고 난이도';
+
+  @override
+  String get settings => '설정';
+
+  @override
+  String get settingsGeneral => '일반';
+
+  @override
+  String get settingsDownloads => '다운로드';
+
+  @override
+  String get uiScale => 'UI 배율';
+
+  @override
+  String get uiScaleHint => 'Ctrl + 마우스 휠이나 Ctrl + +, −, 0으로도 바꿀 수 있습니다.';
+
+  @override
+  String get libraryFolder => '라이브러리 폴더';
+
+  @override
+  String get change => '변경';
+
+  @override
+  String get levelFolderName => '레벨 폴더 이름';
+
+  @override
+  String get levelFolderNameHint => '새로 받는 레벨의 폴더 이름입니다. 태그를 누르면 넣어지고, /로 하위 폴더를 만들 수 있습니다.';
+
+  @override
+  String get levelFolderNameKept => '이미 받은 레벨의 폴더는 아래 \'받은 레벨에 적용\'을 눌러야 바뀝니다.';
+
+  @override
+  String folderNameExample(Object name) {
+    return '예시: $name';
+  }
+
+  @override
+  String unknownFolderTags(Object tags) {
+    return '없는 태그(적은 그대로 남습니다): $tags';
+  }
+
+  @override
+  String folderNameWithoutId(Object tag) {
+    return '$tag가 없으면 이미 있는 이름일 때 뒤에 레벨 ID가 붙습니다.';
+  }
+
+  @override
+  String get resetToDefault => '기본값으로 되돌리기';
+
+  @override
+  String get folderTagId => '레벨 ID';
+
+  @override
+  String get folderTagSong => '곡';
+
+  @override
+  String get folderTagArtist => '작곡가';
+
+  @override
+  String get fillChartMetadata => '레벨 정보를 TUF 정보로 채우기';
+
+  @override
+  String get fillChartMetadataHint => '받은 레벨 파일의 곡·작곡가·제작자가 비어 있거나 TUF와 다르면 TUF 정보로 바꿉니다. 색·굵기 같은 꾸밈만 다른 경우는 그대로 둡니다.';
+
+  @override
+  String get applyToDownloaded => '받은 레벨에 적용';
+
+  @override
+  String gettingLevelInfo(int done, int total) {
+    return '레벨 정보 받는 중 ($done/$total)';
+  }
+
+  @override
+  String renamingFolders(int done, int total) {
+    return '폴더 이름 바꾸는 중 ($done/$total)';
+  }
+
+  @override
+  String checkingLevelFiles(int done, int total) {
+    return '레벨 파일 확인 중 ($done/$total)';
+  }
+
+  @override
+  String renamedFolders(int count) {
+    return '폴더 $count개의 이름을 바꿨습니다.';
+  }
+
+  @override
+  String renamedFoldersWithFailures(int count, int failed, Object first) {
+    return '폴더 $count개의 이름을 바꿨고, $failed개는 바꾸지 못했습니다($first). 게임에서 열려 있다면 닫고 다시 해 주세요.';
+  }
+
+  @override
+  String get noFoldersToRename => '받은 레벨의 폴더가 모두 이미 이 형식을 따릅니다.';
+
+  @override
+  String get renameFoldersNote =>
+      '폴더 안에 정리한 레벨(팩으로 받은 레벨 포함)은 그 폴더에 둔 채 자기 폴더 이름만 바뀝니다. 이미 있는 이름이면 뒤에 레벨 ID가 붙습니다. 게임이 열어 둔 폴더는 바꿀 수 없으니 게임을 먼저 닫아 주세요.';
+
+  @override
+  String fillChartsNote(int count) {
+    return '받은 레벨 $count개의 파일을 확인해서, 곡·작곡가·제작자가 비어 있거나 TUF와 다르면 TUF 정보로 바꿉니다. 레벨을 다시 받으면 원래 파일로 돌아갑니다.';
+  }
+
+  @override
+  String filledLevelFiles(int count) {
+    return '레벨 파일 $count개의 정보를 채웠습니다.';
+  }
+
+  @override
+  String levelFilesNotEdited(int count) {
+    return ' $count개는 고치지 못했습니다(게임에서 열려 있는지 확인해 주세요).';
+  }
+
+  @override
+  String couldNotGetLevelInfo(Object error) {
+    return 'TUF에서 레벨 정보를 받지 못했습니다: $error';
+  }
+
+  @override
+  String get apply => '적용';
+
+  @override
+  String get applyToDownloadedHint => '이미 받은 레벨의 폴더 이름을 위 형식으로 바꾸고, 정보 채우기가 켜져 있으면 레벨 정보도 채웁니다. 바뀔 내용을 먼저 보여 줍니다.';
+
+  @override
+  String get applyToDownloadedTitle => '받은 레벨에 적용할까요?';
+
+  @override
+  String renameFoldersHeading(int count) {
+    return '폴더 $count개 이름 바꾸기';
+  }
 }

@@ -173,6 +173,23 @@ class LevelLibrary {
 
   String folderPathOf(InstalledLevel level) => p.join(rootPath, level.folderName);
 
+  /// [wanted] ('/'-separated, relative to the root), or "[wanted] ({id})" (then "... 2", "... 3") when that folder
+  /// already exists. A name without the id can be taken by another level, and an existing folder may hold other
+  /// levels or the user's files, so it is never reused. [current] is the level's own folder, which may be renamed
+  /// to the same name in different case (Windows sees those as one folder).
+  Future<String> freeFolderName(String wanted, int levelId, {String? current}) async {
+    final own = current == null ? null : _normalizePath(current).toLowerCase();
+    var candidate = wanted;
+    for (
+      var attempt = 1;
+      _normalizePath(candidate).toLowerCase() != own && await Directory(p.join(rootPath, candidate)).exists();
+      attempt++
+    ) {
+      candidate = attempt == 1 ? '$wanted ($levelId)' : '$wanted ($levelId) $attempt';
+    }
+    return candidate;
+  }
+
   Future<void> set(InstalledLevel level) {
     if (!_isSafeFolderName(level.folderName)) {
       throw FileSystemException(l10n.invalidLevelFolderName, level.folderName);

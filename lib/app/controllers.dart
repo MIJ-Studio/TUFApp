@@ -7,12 +7,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/folder_template.dart';
 import '../core/frame_log.dart';
 import '../core/l10n.dart';
 import '../core/level_downloader.dart';
 import '../core/level_library.dart';
 import '../core/level_manager.dart';
 import '../core/level_sizes.dart';
+import '../core/library_maintenance.dart';
 import '../core/library_organizer.dart';
 import '../core/models/difficulty.dart';
 import '../core/models/facet.dart';
@@ -25,6 +27,7 @@ import 'browse_controllers.dart';
 import 'navigation_history.dart';
 import 'packs_controller.dart';
 
+export '../core/library_maintenance.dart' show FolderRename, LibraryApplyPlan;
 export 'browse_controllers.dart';
 export 'navigation_history.dart';
 export 'packs_controller.dart';
@@ -138,6 +141,26 @@ class AppController extends ChangeNotifier {
     await _saveSettings((settings) => settings.zoom = zoom == 1 ? null : zoom);
   }
 
+  /// How new downloads are named, e.g. "{artist} - {song} [{id}]". Levels already in the library keep their folders.
+  String get levelFolderTemplate => library.settings?.levelFolderTemplate ?? LevelFolderTemplate.defaultTemplate;
+
+  /// An empty template (or the default) goes back to the default.
+  Future<void> setLevelFolderTemplate(String template) async {
+    final value = template.trim().isEmpty || template == LevelFolderTemplate.defaultTemplate ? null : template;
+    if (library.settings?.levelFolderTemplate == value) return;
+    await _saveSettings((settings) => settings.levelFolderTemplate = value);
+    notifyListeners();
+  }
+
+  /// Whether downloads get the song, artist and author from TUF written into the level file.
+  bool get fillChartMetadata => library.settings?.fillChartMetadata ?? false;
+
+  Future<void> setFillChartMetadata(bool value) async {
+    if (fillChartMetadata == value) return;
+    await _saveSettings((settings) => settings.fillChartMetadata = value);
+    notifyListeners();
+  }
+
   /// Steps back within the current tab: closes the open pack, or goes up one library folder.
   /// Returns false if there is nothing to go back to.
   bool goBackInPage() {
@@ -153,15 +176,20 @@ class AppController extends ChangeNotifier {
     }
   }
 
-  Future<void> _saveSettings(void Function(AppSettings settings) change) async {
+  /// Saves run one after another, so quick changes (typing a template) never write the file at the same time.
+  Future<void> _settingsSaving = Future.value();
+
+  Future<void> _saveSettings(void Function(AppSettings settings) change) {
     final settings = library.settings;
-    if (settings == null) return;
+    if (settings == null) return Future.value();
     change(settings);
-    try {
-      await settings.save();
-    } on FileSystemException catch (e) {
-      setStatus(l10n.couldNotSaveSettings(e.message));
-    }
+    return _settingsSaving = _settingsSaving.then((_) async {
+      try {
+        await settings.save();
+      } on FileSystemException catch (e) {
+        setStatus(l10n.couldNotSaveSettings(e.message));
+      }
+    });
   }
 
   static String get _readyText => l10n.ready;
@@ -898,7 +926,7 @@ class LibraryController extends ChangeNotifier {
     await opened.pruneMissing();
     library = opened;
     organizer = LibraryOrganizer(opened);
-    installs.manager = LevelManager(api, opened);
+    installs.manager = LevelManager(api, opened, settings: () => settings);
     _pendingUpdates.clear();
     currentPath = '';
 
@@ -1113,6 +1141,86 @@ class LibraryController extends ChangeNotifier {
       // Also refresh the download buttons on the levels page.
       installs.refresh();
     }
+  }
+
+  // ── Applying the download settings to levels already in the library ──
+
+  /// What is being done to the downloaded levels ("Getting level info (50/389)"), or null when idle.
+  String? maintenanceProgress;
+
+  bool get isMaintaining => maintenanceProgress != null;
+
+  void _reportMaintenance(String? progress) {
+    maintenanceProgress = progress;
+    notifyListeners();
+  }
+
+  /// Runs [work] unless downloads are running (they write into the library) or another run is going.
+  /// Returns null (with the reason in the status) when it didn't run or TUF couldn't be reached.
+  Future<T?> _maintain<T>(Future<T> Function(LibraryMaintenance maintenance) work) async {
+    final current = library;
+    if (current == null || isMaintaining) return null;
+    if (installs.activeCount > 0) {
+      onStatus(l10n.cantDoThisWhile);
+      return null;
+    }
+    try {
+      return await work(LibraryMaintenance(api, current));
+    } on TufApiException catch (e) {
+      onStatus(l10n.couldNotGetLevelInfo(e.message));
+      return null;
+    } finally {
+      _reportMaintenance(null);
+    }
+  }
+
+  Future<Map<int, Level>> _fetchInstalledInfo(LibraryMaintenance maintenance, List<InstalledLevel> levels) {
+    _reportMaintenance(l10n.gettingLevelInfo(0, levels.length));
+    return maintenance.fetchInfo(
+      levels,
+      onProgress: (done, total) => _reportMaintenance(l10n.gettingLevelInfo(done, total)),
+    );
+  }
+
+  /// What applying the download settings would do: the folders [template] names differently, plus the TUF info
+  /// that filling in level files needs. null if it couldn't run.
+  Future<LibraryApplyPlan?> planApply(String template) => _maintain((maintenance) async {
+    final levels = installed;
+    final info = await _fetchInstalledInfo(maintenance, levels);
+    return LibraryApplyPlan(renames: LibraryMaintenance.planRenames(levels, info, template), info: info);
+  });
+
+  /// Renames the planned folders, then (with [fill]) writes TUF's song, artist and author into every downloaded
+  /// level's file where they are empty or differ.
+  Future<void> apply(LibraryApplyPlan plan, {required bool fill}) async {
+    await _maintain((maintenance) async {
+      final messages = <String>[];
+      if (plan.renames.isNotEmpty) {
+        final result = await maintenance.rename(
+          plan.renames,
+          skip: (levelId) => installs.jobFor(levelId) != null,
+          onProgress: (done, total) => _reportMaintenance(l10n.renamingFolders(done, total)),
+        );
+        messages.add(
+          result.failures.isEmpty
+              ? l10n.renamedFolders(result.renamed)
+              : l10n.renamedFoldersWithFailures(result.renamed, result.failures.length, result.failures.first),
+        );
+      }
+      if (fill) {
+        // Read the levels again: the folders may have just moved.
+        final result = await maintenance.fillCharts(
+          installed,
+          plan.info,
+          onProgress: (done, total) => _reportMaintenance(l10n.checkingLevelFiles(done, total)),
+        );
+        messages.add(
+          l10n.filledLevelFiles(result.changed) + (result.failed > 0 ? l10n.levelFilesNotEdited(result.failed) : ''),
+        );
+      }
+      onStatus(messages.join(' '));
+    });
+    await refreshContents();
   }
 
   Future<void> changeFolder() async {

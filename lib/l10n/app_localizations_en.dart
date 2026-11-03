@@ -1980,4 +1980,145 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get highestDifficulty => 'Highest difficulty';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get settingsGeneral => 'General';
+
+  @override
+  String get settingsDownloads => 'Downloads';
+
+  @override
+  String get uiScale => 'UI scale';
+
+  @override
+  String get uiScaleHint => 'Also Ctrl + mouse wheel, or Ctrl + plus, minus and 0.';
+
+  @override
+  String get libraryFolder => 'Library folder';
+
+  @override
+  String get change => 'Change';
+
+  @override
+  String get levelFolderName => 'Level folder name';
+
+  @override
+  String get levelFolderNameHint => 'How new downloads are named. Click a tag to add it; / makes a subfolder.';
+
+  @override
+  String get levelFolderNameKept =>
+      'Levels already downloaded keep their folders until you apply the settings to them (below).';
+
+  @override
+  String folderNameExample(Object name) {
+    return 'Example: $name';
+  }
+
+  @override
+  String unknownFolderTags(Object tags) {
+    return 'Unknown tags (left as written): $tags';
+  }
+
+  @override
+  String folderNameWithoutId(Object tag) {
+    return 'Without $tag, a name that is already taken gets the level ID added.';
+  }
+
+  @override
+  String get resetToDefault => 'Reset to default';
+
+  @override
+  String get folderTagId => 'Level ID';
+
+  @override
+  String get folderTagSong => 'Song';
+
+  @override
+  String get folderTagArtist => 'Artist';
+
+  @override
+  String get fillChartMetadata => 'Fill in level info from TUF';
+
+  @override
+  String get fillChartMetadataHint =>
+      'When a downloaded level file\'s song, artist or author is empty or differs from TUF, it is replaced with TUF\'s. Only decoration (color, bold, ...) doesn\'t count as a difference.';
+
+  @override
+  String get applyToDownloaded => 'Apply to downloaded levels';
+
+  @override
+  String gettingLevelInfo(int done, int total) {
+    return 'Getting level info ($done/$total)';
+  }
+
+  @override
+  String renamingFolders(int done, int total) {
+    return 'Renaming folders ($done/$total)';
+  }
+
+  @override
+  String checkingLevelFiles(int done, int total) {
+    return 'Checking level files ($done/$total)';
+  }
+
+  @override
+  String renamedFolders(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'folders', one: 'folder');
+    return 'Renamed $count $_temp0.';
+  }
+
+  @override
+  String renamedFoldersWithFailures(int count, int failed, Object first) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'folders', one: 'folder');
+    return 'Renamed $count $_temp0; $failed couldn\'t be renamed ($first). If the game has them open, close it and try again.';
+  }
+
+  @override
+  String get noFoldersToRename => 'Every downloaded level\'s folder already follows this format.';
+
+  @override
+  String get renameFoldersNote =>
+      'Levels you put in a folder (or that came with a pack) stay there; only their own folder is renamed. A name that\'s already taken gets the level ID added. Close the game first, since folders it has open can\'t be renamed.';
+
+  @override
+  String fillChartsNote(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'levels', one: 'level');
+    return 'Checks the level files of $count downloaded $_temp0 and writes TUF\'s song, artist and author where they are empty or differ. Downloading a level again brings back its original file.';
+  }
+
+  @override
+  String filledLevelFiles(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'files', one: 'file');
+    return 'Filled in the info of $count level $_temp0.';
+  }
+
+  @override
+  String levelFilesNotEdited(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'files', one: 'file');
+    return ' $count $_temp0 couldn\'t be edited (open in the game?).';
+  }
+
+  @override
+  String couldNotGetLevelInfo(Object error) {
+    return 'Couldn\'t get level info from TUF: $error';
+  }
+
+  @override
+  String get apply => 'Apply';
+
+  @override
+  String get applyToDownloadedHint =>
+      'Renames the folders of levels already downloaded to the format above, and fills in their level info if that is on. Shows what will change first.';
+
+  @override
+  String get applyToDownloadedTitle => 'Apply to downloaded levels?';
+
+  @override
+  String renameFoldersHeading(int count) {
+    String _temp0 = intl.Intl.pluralLogic(count, locale: localeName, other: 'folders', one: 'folder');
+    return 'Rename $count $_temp0';
+  }
 }

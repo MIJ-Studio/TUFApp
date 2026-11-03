@@ -15,6 +15,12 @@ if (-not $versionLine) { throw 'No version in pubspec.yaml.' }
 $version = $versionLine.Matches[0].Groups[1].Value
 
 if (-not $SkipBuild) {
+  # Incremental builds keep the icon font trimmed for an older build, so newly used icons come out blank.
+  # Deleting it makes the build trim it again for the current code.
+  @(
+    'build\flutter_assets\fonts\MaterialIcons-Regular.otf',
+    'build\windows\x64\runner\Release\data\flutter_assets\fonts\MaterialIcons-Regular.otf'
+  ) | ForEach-Object { Join-Path $project $_ } | Where-Object { Test-Path $_ } | Remove-Item
   Push-Location $project
   try {
     flutter build windows --release

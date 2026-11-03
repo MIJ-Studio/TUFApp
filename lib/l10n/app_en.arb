@@ -1515,5 +1515,146 @@
   "extra": "Extra",
   "cancelled": "Cancelled",
   "lowestDifficulty": "Lowest difficulty",
-  "highestDifficulty": "Highest difficulty"
+  "highestDifficulty": "Highest difficulty",
+  "settings": "Settings",
+  "settingsGeneral": "General",
+  "settingsDownloads": "Downloads",
+  "uiScale": "UI scale",
+  "uiScaleHint": "Also Ctrl + mouse wheel, or Ctrl + plus, minus and 0.",
+  "libraryFolder": "Library folder",
+  "change": "Change",
+  "levelFolderName": "Level folder name",
+  "levelFolderNameHint": "How new downloads are named. Click a tag to add it; / makes a subfolder.",
+  "levelFolderNameKept": "Levels already downloaded keep their folders until you apply the settings to them (below).",
+  "folderNameExample": "Example: {name}",
+  "@folderNameExample": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "unknownFolderTags": "Unknown tags (left as written): {tags}",
+  "@unknownFolderTags": {
+    "placeholders": {
+      "tags": {
+        "type": "Object"
+      }
+    }
+  },
+  "folderNameWithoutId": "Without {tag}, a name that is already taken gets the level ID added.",
+  "@folderNameWithoutId": {
+    "placeholders": {
+      "tag": {
+        "type": "Object"
+      }
+    }
+  },
+  "resetToDefault": "Reset to default",
+  "folderTagId": "Level ID",
+  "folderTagSong": "Song",
+  "folderTagArtist": "Artist",
+  "fillChartMetadata": "Fill in level info from TUF",
+  "fillChartMetadataHint": "When a downloaded level file's song, artist or author is empty or differs from TUF, it is replaced with TUF's. Only decoration (color, bold, ...) doesn't count as a difference.",
+  "applyToDownloaded": "Apply to downloaded levels",
+  "gettingLevelInfo": "Getting level info ({done}/{total})",
+  "@gettingLevelInfo": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "renamingFolders": "Renaming folders ({done}/{total})",
+  "@renamingFolders": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "checkingLevelFiles": "Checking level files ({done}/{total})",
+  "@checkingLevelFiles": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "renamedFolders": "Renamed {count} {count, plural, =1{folder} other{folders}}.",
+  "@renamedFolders": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "renamedFoldersWithFailures": "Renamed {count} {count, plural, =1{folder} other{folders}}; {failed} couldn't be renamed ({first}). If the game has them open, close it and try again.",
+  "@renamedFoldersWithFailures": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "first": {
+        "type": "Object"
+      }
+    }
+  },
+  "noFoldersToRename": "Every downloaded level's folder already follows this format.",
+  "renameFoldersNote": "Levels you put in a folder (or that came with a pack) stay there; only their own folder is renamed. A name that's already taken gets the level ID added. Close the game first, since folders it has open can't be renamed.",
+  "fillChartsNote": "Checks the level files of {count} downloaded {count, plural, =1{level} other{levels}} and writes TUF's song, artist and author where they are empty or differ. Downloading a level again brings back its original file.",
+  "@fillChartsNote": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "filledLevelFiles": "Filled in the info of {count} level {count, plural, =1{file} other{files}}.",
+  "@filledLevelFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "levelFilesNotEdited": " {count} {count, plural, =1{file} other{files}} couldn't be edited (open in the game?).",
+  "@levelFilesNotEdited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotGetLevelInfo": "Couldn't get level info from TUF: {error}",
+  "@couldNotGetLevelInfo": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "apply": "Apply",
+  "applyToDownloadedHint": "Renames the folders of levels already downloaded to the format above, and fills in their level info if that is on. Shows what will change first.",
+  "applyToDownloadedTitle": "Apply to downloaded levels?",
+  "renameFoldersHeading": "Rename {count} {count, plural, =1{folder} other{folders}}",
+  "@renameFoldersHeading": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -199,12 +199,8 @@ class Level {
   String? get creatorDisplay {
     if (team != null) return team;
 
-    final sorted = [...credits]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
-    List<String> namesFor(String role) =>
-        sorted.where((c) => c.role?.toLowerCase() == role).map((c) => c.creatorName).whereType<String>().toList();
-
-    final charters = namesFor('charter');
-    final vfxers = namesFor('vfxer');
+    final charters = creditedNames('charter');
+    final vfxers = creditedNames('vfxer');
     final primaryCount = charters.length + vfxers.length;
 
     if (primaryCount >= 3) {
@@ -222,6 +218,23 @@ class Level {
     if (charters.isNotEmpty) return charters.first;
     if (vfxers.isNotEmpty) return vfxers.first;
     return creator;
+  }
+
+  /// Every creator without shortening, all joined with " & " ("A & B & C"), for places with room for all names
+  /// like the level file. Charters come before VFX, and someone credited for both is named once.
+  /// Team first, like [creatorDisplay].
+  String? get creatorFull {
+    if (team != null) return team;
+    final names = {...creditedNames('charter'), ...creditedNames('vfxer')};
+    if (names.isNotEmpty) return names.join(' & ');
+    // The creator string from search results separates charter and VFX with '|'.
+    return creator?.split('|').map((name) => name.trim()).where((name) => name.isNotEmpty).toSet().join(' & ');
+  }
+
+  /// Names credited with [role] ("charter", "vfxer"), in the website's order.
+  List<String> creditedNames(String role) {
+    final sorted = [...credits]..sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
+    return sorted.where((c) => c.role?.toLowerCase() == role).map((c) => c.creatorName).whereType<String>().toList();
   }
 }
 

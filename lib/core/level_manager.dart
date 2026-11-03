@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'chart_metadata.dart';
+import 'folder_template.dart';
 import 'l10n.dart';
 import 'level_downloader.dart';
 import 'level_library.dart';
@@ -45,14 +47,22 @@ class LevelUpdateInfo {
 
 /// Entry point for downloading, updating and deleting levels.
 class LevelManager {
-  LevelManager(this._api, this.library) : _downloader = LevelDownloader(_api);
+  /// [settings] gives the current settings (folder name template, filling in level info); read on every download.
+  LevelManager(this._api, this.library, {AppSettings? Function()? settings})
+    : _downloader = LevelDownloader(_api),
+      _settings = settings ?? _noSettings;
 
   static const _updateCheckConcurrency = 4;
-  static const _maxFolderNameLength = 80;
+
+  /// Longest name of one folder. Long paths break the game, so names are kept short.
+  static const maxFolderNameLength = 80;
 
   final TufApiClient _api;
   final LevelLibrary library;
   final LevelDownloader _downloader;
+  final AppSettings? Function() _settings;
+
+  static AppSettings? _noSettings() => null;
 
   /// Downloads a level into the library, replacing the existing version if present.
   Future<InstalledLevel> install(
@@ -65,7 +75,11 @@ class LevelManager {
     if (dlLink == null || !LevelDownloader.isTufCdnLink(dlLink)) throw LevelNotDownloadableException(level);
 
     onProgress?.call(InstallProgress(level.id, InstallStage.fetchingInfo));
-    final metadata = await _tryGetCdnMetadata(level.id);
+    final settings = _settings();
+    final template = settings?.levelFolderTemplate ?? LevelFolderTemplate.defaultTemplate;
+    final fillChart = settings?.fillChartMetadata ?? false;
+    final (metadata, detailed) = await (_tryGetCdnMetadata(level.id), _withCredits(level, template, fillChart)).wait;
+    level = detailed;
     cancelToken?.throwIfCancelled();
 
     await Directory(library.tempPath).create(recursive: true);
@@ -93,10 +107,15 @@ class LevelManager {
       final existing = library.get(level.id);
       final folderName = existing != null && library.safeFolderPathOf(existing) != null
           ? existing.folderName
-          : [?parentFolder, folderNameFor(level)].join('/');
+          : await library.freeFolderName([?parentFolder, folderNameFor(level, template)].join('/'), level.id);
       final finalDir = p.join(library.rootPath, folderName);
       await Directory(p.dirname(finalDir)).create(recursive: true);
       await _replaceDirectory(stagingDir, finalDir);
+
+      final mainChartPath = await _findMainChart(finalDir, metadata);
+      if (fillChart && mainChartPath != null) {
+        await _tryFillChart(p.join(finalDir, mainChartPath), level);
+      }
 
       final installed = InstalledLevel(
         levelId: level.id,
@@ -106,7 +125,7 @@ class LevelManager {
         difficulty: level.difficulty?.name,
         fileId: level.fileId ?? '',
         folderName: folderName,
-        mainChartPath: await _findMainChart(finalDir, metadata),
+        mainChartPath: mainChartPath,
         sizeBytes: size,
         installedAt: DateTime.now(),
       );
@@ -175,16 +194,49 @@ class LevelManager {
     }
   }
 
-  /// Folder name in the form "#{id} {song}", e.g. "#5947 4'33''".
+  /// Search results and pack contents may lack the credit list, which the creator values and the level file's
+  /// author need. Fetches the full level only when something uses them; on failure the level is used as is.
+  Future<Level> _withCredits(Level level, String template, bool fillChart) async {
+    if (level.credits.isNotEmpty || level.team != null) return level;
+    final usesCredits =
+        fillChart ||
+        [
+          FolderTag.creator,
+          FolderTag.charter,
+          FolderTag.vfxer,
+          FolderTag.team,
+        ].any((tag) => template.toLowerCase().contains(tag.token));
+    if (!usesCredits) return level;
+    try {
+      final full = await _api.getLevel(level.id);
+      // Keep what the caller filled in (a pack fills in the difficulty from the catalog).
+      return full.difficulty == null && level.difficulty != null ? full.copyWith(difficulty: level.difficulty) : full;
+    } on TufApiException {
+      return level;
+    }
+  }
+
+  /// A level that can't be edited (read-only, locked by the game, not UTF-8) is kept as downloaded.
+  static Future<void> _tryFillChart(String path, Level level) async {
+    try {
+      await ChartMetadata.fill(path, ChartMetadata.infoOf(level));
+    } on FileSystemException {
+      // Filling in the info is a convenience; the download itself succeeded.
+    }
+  }
+
+  /// The folder for [level] from a [template] like "{artist} - {song} [{id}]" ('/'-separated when it makes
+  /// subfolders). The default is "#{id} {song}", e.g. "#5947 4'33''".
   /// Characters not allowed in Windows folder names become '_'.
   @visibleForTesting
-  static String folderNameFor(Level level) => safeFolderName('#${level.id} ${level.song}');
+  static String folderNameFor(Level level, [String template = LevelFolderTemplate.defaultTemplate]) =>
+      LevelFolderTemplate.format(template, level);
 
   /// Makes any name (level, pack, folder in a pack) usable as a Windows folder name.
   /// '+' is allowed on Windows, but the game can't load levels whose path contains it, so it is replaced too.
   static String safeFolderName(String name) {
     var safe = name.replaceAll(RegExp(r'[<>:"/\\|?*+\x00-\x1F]'), '_').trim();
-    if (safe.length > _maxFolderNameLength) safe = safe.substring(0, _maxFolderNameLength);
+    if (safe.length > maxFolderNameLength) safe = safe.substring(0, maxFolderNameLength);
     // Windows doesn't allow trailing dots or spaces.
     safe = safe.replaceAll(RegExp(r'[. ]+$'), '');
     return safe.isEmpty ? '_' : safe;
@@ -256,7 +308,13 @@ class LevelManager {
 
 /// Settings stored in %AppData%\TUFApp\settings.json, shared with the C# version.
 class AppSettings {
-  AppSettings({required this.libraryPath, this.language, this.zoom});
+  AppSettings({
+    required this.libraryPath,
+    this.language,
+    this.zoom,
+    this.levelFolderTemplate,
+    this.fillChartMetadata = false,
+  });
 
   String libraryPath;
 
@@ -266,7 +324,18 @@ class AppSettings {
   /// UI zoom factor. null means 100%.
   double? zoom;
 
+  /// How new downloads are named (see [LevelFolderTemplate]). null means [LevelFolderTemplate.defaultTemplate].
+  String? levelFolderTemplate;
+
+  /// Whether downloads get the song, artist and author from TUF written into the level file ([ChartMetadata]).
+  bool fillChartMetadata;
+
+  /// Where tests keep the settings file, so they never touch the real one.
+  @visibleForTesting
+  static String? directoryForTesting;
+
   static Future<String> _settingsDirectory() async {
+    if (directoryForTesting case final directory?) return directory;
     final appData = Platform.environment['APPDATA'];
     if (Platform.isWindows && appData != null) return p.join(appData, 'TUFApp');
     return (await getApplicationSupportDirectory()).path;
@@ -280,6 +349,8 @@ class AppSettings {
     String? path;
     AppLanguage? language;
     double? zoom;
+    String? template;
+    var fillChart = false;
     try {
       if (await file.exists()) {
         final json = jsonDecode(await file.readAsString());
@@ -287,21 +358,35 @@ class AppSettings {
           if (json['libraryPath'] case final String value when value.trim().isNotEmpty) path = value;
           language = AppLanguage.fromCode(json['language']);
           if (json['zoom'] case final num value when value > 0) zoom = value.toDouble();
+          if (json['levelFolderTemplate'] case final String value when value.trim().isNotEmpty) template = value;
+          fillChart = json['fillChartMetadata'] == true;
         }
       }
     } on FormatException {
       // Start with defaults if the settings file is broken.
     }
-    return AppSettings(libraryPath: path ?? await defaultLibraryPath(), language: language, zoom: zoom);
+    return AppSettings(
+      libraryPath: path ?? await defaultLibraryPath(),
+      language: language,
+      zoom: zoom,
+      levelFolderTemplate: template,
+      fillChartMetadata: fillChart,
+    );
   }
 
+  /// Only values that differ from the default are written, so the file stays readable by the C# version.
   Future<void> save() async {
     final dir = Directory(await _settingsDirectory());
     await dir.create(recursive: true);
     final file = File(p.join(dir.path, 'settings.json'));
     await file.writeAsString(
-      const JsonEncoder.withIndent('  ')
-          .convert({'libraryPath': libraryPath, 'language': ?language?.code, 'zoom': ?zoom}),
+      const JsonEncoder.withIndent('  ').convert({
+        'libraryPath': libraryPath,
+        'language': ?language?.code,
+        'zoom': ?zoom,
+        'levelFolderTemplate': ?levelFolderTemplate,
+        if (fillChartMetadata) 'fillChartMetadata': true,
+      }),
     );
   }
 }

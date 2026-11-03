@@ -133,9 +133,36 @@ class TufApiClient {
     return _inOrder(asObjectList(json['results']).map(PlayerPassEntry.fromJson), ids, (entry) => entry.pass.id);
   }
 
+  /// The server rejects a longer search text ("exceeds 255 characters").
+  static const maxQueryLength = 255;
+
+  /// [ids] split into groups whose id search ([getLevelsByIds], [getPassesByIds]) fits in [maxQueryLength].
+  static List<List<int>> idBatches(List<int> ids) {
+    final batches = <List<int>>[];
+    var batch = <int>[];
+    var length = 0;
+    for (final id in ids) {
+      final term = _idTerm(id).length;
+      final added = batch.isEmpty ? term : length + _idSeparator.length + term;
+      if (batch.isNotEmpty && added > maxQueryLength) {
+        batches.add(batch);
+        batch = [id];
+        length = term;
+      } else {
+        batch.add(id);
+        length = added;
+      }
+    }
+    if (batch.isNotEmpty) batches.add(batch);
+    return batches;
+  }
+
+  static String _idTerm(int id) => 'id:$id';
+  static const _idSeparator = ' | ';
+
   /// The search language joins alternatives with '|'.
   static Map<String, Object> _idQuery(List<int> ids) => {
-    'query': ids.map((id) => 'id:$id').join(' | '),
+    'query': ids.map(_idTerm).join(_idSeparator),
     'limit': '${ids.length}',
     'offset': '0',
     'deletedFilter': 'hide',

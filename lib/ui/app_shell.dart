@@ -9,6 +9,7 @@ import 'pages/leaderboard_page.dart';
 import 'pages/levels_page.dart';
 import 'pages/library_page.dart';
 import 'pages/packs_page.dart';
+import 'pages/settings_page.dart';
 import 'widgets/motion.dart';
 
 /// App bar and tabs. All pages stay alive and are stacked, so scroll positions and input survive switching tabs.
@@ -202,7 +203,11 @@ class _AppShellState extends State<AppShell> with SingleTickerProviderStateMixin
                   ),
                 ),
                 const SizedBox(width: 8),
-                _LanguageMenu(app: app),
+                IconButton(
+                  tooltip: l10n.settings,
+                  onPressed: () => SettingsPage.open(context),
+                  icon: const Icon(Icons.settings_outlined),
+                ),
                 const SizedBox(width: 8),
               ],
             ),
@@ -242,35 +247,6 @@ class _TabsThenStatus extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_TabsThenStatus oldDelegate) => false;
-}
-
-/// UI language menu: follow the system language or pin Korean or English.
-class _LanguageMenu extends StatelessWidget {
-  const _LanguageMenu({required this.app});
-
-  final AppController app;
-
-  @override
-  Widget build(BuildContext context) {
-    final choice = app.languageChoice;
-    return PopupMenuButton<AppLanguage?>(
-      tooltip: l10n.language,
-      icon: const Icon(Icons.translate),
-      // onSelected ignores a null value, and null (system language) must be selectable, so each item uses onTap.
-      itemBuilder: (context) => [
-        for (final (value, label) in [
-          (null, l10n.systemLanguage(AppLanguage.system.nativeName)),
-          for (final language in AppLanguage.values) (language, language.nativeName),
-        ])
-          CheckedPopupMenuItem(
-            value: value,
-            checked: value == choice,
-            onTap: () => app.setLanguage(value),
-            child: Text(label),
-          ),
-      ],
-    );
-  }
 }
 
 /// The visible page fades in; hidden pages keep their state but ignore input.

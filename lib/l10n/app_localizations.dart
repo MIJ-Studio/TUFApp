@@ -3379,6 +3379,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Highest difficulty'**
   String get highestDifficulty;
+
+  /// No description provided for @settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// No description provided for @settingsGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get settingsGeneral;
+
+  /// No description provided for @settingsDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get settingsDownloads;
+
+  /// No description provided for @uiScale.
+  ///
+  /// In en, this message translates to:
+  /// **'UI scale'**
+  String get uiScale;
+
+  /// No description provided for @uiScaleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Also Ctrl + mouse wheel, or Ctrl + plus, minus and 0.'**
+  String get uiScaleHint;
+
+  /// No description provided for @libraryFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Library folder'**
+  String get libraryFolder;
+
+  /// No description provided for @change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get change;
+
+  /// No description provided for @levelFolderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Level folder name'**
+  String get levelFolderName;
+
+  /// No description provided for @levelFolderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How new downloads are named. Click a tag to add it; / makes a subfolder.'**
+  String get levelFolderNameHint;
+
+  /// No description provided for @levelFolderNameKept.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels already downloaded keep their folders until you apply the settings to them (below).'**
+  String get levelFolderNameKept;
+
+  /// No description provided for @folderNameExample.
+  ///
+  /// In en, this message translates to:
+  /// **'Example: {name}'**
+  String folderNameExample(Object name);
+
+  /// No description provided for @unknownFolderTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown tags (left as written): {tags}'**
+  String unknownFolderTags(Object tags);
+
+  /// No description provided for @folderNameWithoutId.
+  ///
+  /// In en, this message translates to:
+  /// **'Without {tag}, a name that is already taken gets the level ID added.'**
+  String folderNameWithoutId(Object tag);
+
+  /// No description provided for @resetToDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get resetToDefault;
+
+  /// No description provided for @folderTagId.
+  ///
+  /// In en, this message translates to:
+  /// **'Level ID'**
+  String get folderTagId;
+
+  /// No description provided for @folderTagSong.
+  ///
+  /// In en, this message translates to:
+  /// **'Song'**
+  String get folderTagSong;
+
+  /// No description provided for @folderTagArtist.
+  ///
+  /// In en, this message translates to:
+  /// **'Artist'**
+  String get folderTagArtist;
+
+  /// No description provided for @fillChartMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in level info from TUF'**
+  String get fillChartMetadata;
+
+  /// No description provided for @fillChartMetadataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'When a downloaded level file\'s song, artist or author is empty or differs from TUF, it is replaced with TUF\'s. Only decoration (color, bold, ...) doesn\'t count as a difference.'**
+  String get fillChartMetadataHint;
+
+  /// No description provided for @applyToDownloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to downloaded levels'**
+  String get applyToDownloaded;
+
+  /// No description provided for @gettingLevelInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Getting level info ({done}/{total})'**
+  String gettingLevelInfo(int done, int total);
+
+  /// No description provided for @renamingFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Renaming folders ({done}/{total})'**
+  String renamingFolders(int done, int total);
+
+  /// No description provided for @checkingLevelFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking level files ({done}/{total})'**
+  String checkingLevelFiles(int done, int total);
+
+  /// No description provided for @renamedFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Renamed {count} {count, plural, =1{folder} other{folders}}.'**
+  String renamedFolders(int count);
+
+  /// No description provided for @renamedFoldersWithFailures.
+  ///
+  /// In en, this message translates to:
+  /// **'Renamed {count} {count, plural, =1{folder} other{folders}}; {failed} couldn\'t be renamed ({first}). If the game has them open, close it and try again.'**
+  String renamedFoldersWithFailures(int count, int failed, Object first);
+
+  /// No description provided for @noFoldersToRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Every downloaded level\'s folder already follows this format.'**
+  String get noFoldersToRename;
+
+  /// No description provided for @renameFoldersNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels you put in a folder (or that came with a pack) stay there; only their own folder is renamed. A name that\'s already taken gets the level ID added. Close the game first, since folders it has open can\'t be renamed.'**
+  String get renameFoldersNote;
+
+  /// No description provided for @fillChartsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Checks the level files of {count} downloaded {count, plural, =1{level} other{levels}} and writes TUF\'s song, artist and author where they are empty or differ. Downloading a level again brings back its original file.'**
+  String fillChartsNote(int count);
+
+  /// No description provided for @filledLevelFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Filled in the info of {count} level {count, plural, =1{file} other{files}}.'**
+  String filledLevelFiles(int count);
+
+  /// No description provided for @levelFilesNotEdited.
+  ///
+  /// In en, this message translates to:
+  /// **' {count} {count, plural, =1{file} other{files}} couldn\'t be edited (open in the game?).'**
+  String levelFilesNotEdited(int count);
+
+  /// No description provided for @couldNotGetLevelInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t get level info from TUF: {error}'**
+  String couldNotGetLevelInfo(Object error);
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
+
+  /// No description provided for @applyToDownloadedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Renames the folders of levels already downloaded to the format above, and fills in their level info if that is on. Shows what will change first.'**
+  String get applyToDownloadedHint;
+
+  /// No description provided for @applyToDownloadedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply to downloaded levels?'**
+  String get applyToDownloadedTitle;
+
+  /// No description provided for @renameFoldersHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename {count} {count, plural, =1{folder} other{folders}}'**
+  String renameFoldersHeading(int count);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
