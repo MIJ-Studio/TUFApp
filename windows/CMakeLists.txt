@@ -57,6 +57,13 @@ add_subdirectory("runner")
 # them to the application.
 include(flutter/generated_plugins.cmake)
 
+# webview_windows (0.4.0, the latest) still uses MSVC's old /await coroutines, which MSVC 14.51
+# (Visual Studio 18) rejects with error STL1011 unless this is defined. Remove once the plugin moves to
+# C++20 <coroutine>.
+if(TARGET webview_windows_plugin)
+  target_compile_definitions(webview_windows_plugin PRIVATE _SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+endif()
+
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
